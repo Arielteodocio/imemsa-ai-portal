@@ -8,7 +8,7 @@ st.set_page_config(page_title="Transcripción", page_icon="🎧", layout="wide")
 
 st.title("🎧 Transcripción de Audio a Texto")
 st.caption(
-    "Carga un archivo de audio y obtén la transcripción en texto. "
+    "Carga un archivo de audio (Max 25MB) y obtén la transcripción en texto. "
     "Entrega el contenido transcrito listo para copiar o exportar."
 )
 
