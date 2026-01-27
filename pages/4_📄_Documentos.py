@@ -107,7 +107,15 @@ if btn and uploaded is not None:
                 st.download_button("CSV (campos)", kv.to_csv(index=False).encode("utf-8"), "campos.csv", "text/csv")
 
     except Exception as e:
+        # Esto imprime el error REAL en los logs de Streamlit (Manage app -> Logs)
+        print("DOCS_MODULE_ERROR:", repr(e))
+
         if show_maintenance_instead_of_api_error(e):
             st.warning(MAINTENANCE_MSG)
         else:
             st.error("Ocurrió un error inesperado. Contacta al administrador del portal.")
+
+            # Solo si DEBUG=true en Secrets, muestra detalles para ti
+            if str(st.secrets.get("DEBUG", "false")).lower() == "true":
+                with st.expander("🛠️ Detalle técnico (solo admin)", expanded=False):
+                    st.exception(e)
