@@ -1,4 +1,5 @@
 import streamlit as st
+
 from services.translate_openai import translate_en_es
 from utils_export import to_docx_bytes, to_pdf_bytes
 from utils_errors import MAINTENANCE_MSG, show_maintenance_instead_of_api_error
@@ -17,7 +18,12 @@ direction = st.radio(
     horizontal=True,
 )
 
-text = st.text_area("Texto a traducir", height=260, placeholder="Pega aquí el texto…")
+text = st.text_area(
+    "Texto a traducir",
+    height=260,
+    placeholder="Pega aquí el texto…",
+)
+
 btn = st.button("Traducir", type="primary", disabled=(not text.strip()))
 
 if btn:
@@ -30,6 +36,7 @@ if btn:
 
         st.subheader("Exportar")
         c1, c2, c3 = st.columns(3)
+
         with c1:
             st.download_button(
                 "TXT",
@@ -37,12 +44,14 @@ if btn:
                 file_name="traduccion.txt",
                 mime="text/plain",
             )
+
         with c2:
             st.download_button(
                 "DOCX",
                 data=to_docx_bytes("Traducción", result.text),
                 file_name="traduccion.docx",
             )
+
         with c3:
             st.download_button(
                 "PDF",
@@ -51,8 +60,9 @@ if btn:
                 mime="application/pdf",
             )
 
-   except Exception as e:
+    except Exception as e:
         if show_maintenance_instead_of_api_error(e):
             st.warning(MAINTENANCE_MSG)
         else:
-            st.error(f"Error: {e}")
+            st.error("Ocurrió un error inesperado. Contacta al administrador del portal.")
+
