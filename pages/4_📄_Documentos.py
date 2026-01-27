@@ -4,7 +4,7 @@ from io import BytesIO
 import pandas as pd
 import streamlit as st
 from PIL import Image
-import fitz  # pymupdf
+import fitz  # pymupd
 
 from services.docs_ocr_openai import ocr_and_extract_from_images
 from utils_export import to_docx_bytes, to_pdf_bytes
