@@ -1,6 +1,8 @@
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
+from utils_auth import require_password
+require_password()
 
 from services.forecast_anomaly import run_forecast_and_anomaly
 from utils_excel_multi import to_xlsx_multiple_sheets
