@@ -1,13 +1,19 @@
-import hmac
 import streamlit as st
-
+import hmac
 
 def require_password() -> None:
-    """
-    Gate simple por contraseña usando st.session_state.
-    - Password vive en st.secrets["APP_PASSWORD"] (recomendado)
-    - Si no existe en secrets, usa fallback "imemsa26"
-    """
+    # 🔒 Si NO está autenticado, ocultamos sidebar + navegación
+    if not st.session_state.get("authenticated", False):
+        st.markdown(
+            """
+            <style>
+              [data-testid="stSidebar"] {display: none;}
+              [data-testid="stSidebarNav"] {display: none;}
+              header {visibility: hidden;}
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
 
     if st.session_state.get("authenticated", False):
         return
@@ -32,3 +38,4 @@ def require_password() -> None:
         st.info("Si no cuentas con acceso, contacta al administrador del portal.")
 
     st.stop()
+
