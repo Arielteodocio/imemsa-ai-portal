@@ -1,4 +1,6 @@
 import streamlit as st
+from utils_auth import require_password
+require_password()
 
 from services.translate_openai import translate_en_es
 from utils_export import to_docx_bytes, to_pdf_bytes
