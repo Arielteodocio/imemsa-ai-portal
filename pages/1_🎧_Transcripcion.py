@@ -1,9 +1,8 @@
-
 import time
 import streamlit as st
 
 from services.transcribe_openai import transcribe_audio_bytes
-from utils_export import to_docx_bytes, to_pdf_bytes  # archivo que creamos en el paso 4
+from utils_export import to_docx_bytes, to_pdf_bytes
 
 st.set_page_config(page_title="Transcripción", page_icon="🎧", layout="wide")
 
@@ -20,42 +19,31 @@ with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
         "- Solo se utiliza un archivo temporal durante la transcripción."
     )
 
-colL, colR = st.columns([2, 1])
+# ✅ Configuración fija (sin opciones al usuario)
+MODEL = "gpt-4o-mini-transcribe"
+LANGUAGE_HINT = "auto"
+PROMPT = (
+    "El audio es de un contexto industrial/operativo. "
+    "Conserva siglas y términos técnicos. "
+    "Términos: IMEMSA, gel coat, fibra de vidrio, infusión al vacío, T-top, quilla, patín, borda, consola."
+)
 
-with colR:
-    st.subheader("Configuración")
-    model = st.selectbox(
-        "Modelo",
-        ["gpt-4o-mini-transcribe", "gpt-4o-transcribe"],
-        index=0,
-        help="mini = más económico; 4o = mayor calidad/costo.",
-    )
-    language_hint = st.selectbox("Idioma (opcional)", ["auto", "es", "en"], index=0)
-    technical_mode = st.toggle("Modo Técnico (prompt)", value=True)
-    prompt_default = (
-        "El audio es de un contexto industrial/operativo. "
-        "Conserva siglas y términos técnicos. "
-        "Términos: IMEMSA, gel coat, fibra de vidrio, infusión al vacío, T-top, quilla, patín, borda, consola."
-    )
-    prompt = st.text_area("Contexto / glosario (opcional)", value=prompt_default if technical_mode else "", height=120)
+audio_file = st.file_uploader(
+    "Sube audio (mp3, m4a, wav, webm, mp4)",
+    type=["mp3", "m4a", "wav", "webm", "mp4", "mpeg", "mpga"],
+)
 
-with colL:
-    audio_file = st.file_uploader(
-        "Sube audio (mp3, m4a, wav, webm, mp4)",
-        type=["mp3", "m4a", "wav", "webm", "mp4", "mpeg", "mpga"],
-    )
+if audio_file:
+    st.audio(audio_file)
 
-    if audio_file:
-        st.audio(audio_file)
-
-    btn = st.button("Transcribir", type="primary", disabled=(audio_file is None))
+btn = st.button("Transcribir", type="primary", disabled=(audio_file is None))
 
 if btn and audio_file:
     t0 = time.time()
     try:
         audio_bytes = audio_file.read()
 
-        # Recomendación práctica: Streamlit Cloud + OpenAI tiene límite de tamaño por request.
+        # Límite práctico para evitar fallos típicos con archivos grandes
         if len(audio_bytes) > 25 * 1024 * 1024:
             st.error("El archivo supera 25 MB. Divide el audio o usa un formato más comprimido (m4a/mp3).")
             st.stop()
@@ -64,12 +52,12 @@ if btn and audio_file:
             result = transcribe_audio_bytes(
                 audio_bytes=audio_bytes,
                 original_filename=audio_file.name,
-                model=model,
-                language_hint=language_hint,
-                prompt=prompt.strip() or None,
+                model=MODEL,
+                language_hint=LANGUAGE_HINT,
+                prompt=PROMPT,
             )
 
-        st.success(f"Listo ✅ (modelo: {result.model})")
+        st.success("Listo ✅")
 
         st.subheader("Transcripción")
         st.text_area("Resultado", value=result.text, height=360)
@@ -101,3 +89,4 @@ if btn and audio_file:
 
     except Exception as e:
         st.error(f"Error: {e}")
+
