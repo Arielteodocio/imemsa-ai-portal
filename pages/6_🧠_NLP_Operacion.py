@@ -6,25 +6,18 @@ from services.nlp_ops_openai import analyze_ticket
 from utils_excel_multi import to_xlsx_multiple_sheets
 from utils_errors import MAINTENANCE_MSG, show_maintenance_instead_of_api_error
 
-st.set_page_config(page_title="NLP Operación", page_icon="🧠", layout="wide")
+st.set_page_config(page_title="NLP Corporativo", page_icon="🧠", layout="wide")
 
-st.title("🧠 NLP para Operación (Tickets y reportes)")
+st.title("🧠 NLP Corporativo (Clasificación y priorización)")
 st.caption(
-    "Analiza tickets/correos/reportes operativos para clasificar, estimar severidad, extraer datos clave "
-    "y sugerir acciones."
+    "Clasifica solicitudes internas (correo/ticket), asigna área destino, estima prioridad y extrae datos clave. "
+    "Incluye validación para Tesorería: Factura + OC."
 )
 
-with st.expander("💡 Ejemplos de uso", expanded=False):
-    st.write(
-        "- Ticket de mantenimiento: falla en bomba, ruido, vibración.\n"
-        "- Reporte de calidad: defecto en gel coat, retrabajo, scrap.\n"
-        "- Seguridad: incidente, casi accidente, EPP.\n"
-    )
-
 texto = st.text_area(
-    "Pega el ticket / correo / reporte",
+    "Pega aquí el correo / ticket / solicitud",
     height=260,
-    placeholder="Ej: 'Se detectó fuga en la línea de resina...'",
+    placeholder="Ej: 'Necesito pagar hoy al proveedor X, factura 1234, OC 456... impacta embarque...'",
 )
 
 btn = st.button("Analizar", type="primary", disabled=(not texto.strip()))
@@ -38,11 +31,19 @@ if btn:
 
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.metric("Categoría", r.categoria or "—")
+            st.metric("Área destino", r.area or "—")
         with c2:
-            st.metric("Severidad", r.severidad or "—")
+            st.metric("Tipo", r.tipo_solicitud or "—")
         with c3:
-            st.caption(f"Modelo: {r.modelo}")
+            st.metric("Prioridad", r.prioridad or "—")
+
+        if r.motivo_prioridad:
+            st.caption(f"Motivo prioridad: {r.motivo_prioridad}")
+
+        # Faltantes (regla Tesorería)
+        if r.faltantes:
+            st.warning("Faltantes para poder atender la solicitud:")
+            st.write("- " + "\n- ".join(r.faltantes))
 
         st.subheader("Resumen")
         st.write(r.resumen or "—")
@@ -56,49 +57,48 @@ if btn:
         )
         df_actions = st.data_editor(df_actions, use_container_width=True, num_rows="dynamic")
 
-        # Exportables
         st.subheader("Exportar")
 
         json_out = json.dumps(
             {
-                "categoria": r.categoria,
-                "severidad": r.severidad,
+                "area": r.area,
+                "tipo_solicitud": r.tipo_solicitud,
+                "prioridad": r.prioridad,
+                "motivo_prioridad": r.motivo_prioridad,
                 "resumen": r.resumen,
                 "datos_clave": r.datos_clave,
+                "faltantes": r.faltantes,
                 "acciones": df_actions.to_dict(orient="records"),
             },
             ensure_ascii=False,
             indent=2,
         )
 
-        txt_out = (
-            f"CATEGORIA: {r.categoria}\n"
-            f"SEVERIDAD: {r.severidad}\n\n"
-            f"RESUMEN:\n{r.resumen}\n\n"
-            f"DATOS CLAVE:\n{json.dumps(r.datos_clave, ensure_ascii=False, indent=2)}\n\n"
-            f"ACCIONES:\n{df_actions.to_csv(index=False)}"
-        )
-
         xlsx_bytes = to_xlsx_multiple_sheets(
             {
-                "Resumen": pd.DataFrame([{"categoria": r.categoria, "severidad": r.severidad, "resumen": r.resumen}]),
+                "Resumen": pd.DataFrame([{
+                    "area": r.area,
+                    "tipo_solicitud": r.tipo_solicitud,
+                    "prioridad": r.prioridad,
+                    "motivo_prioridad": r.motivo_prioridad,
+                    "resumen": r.resumen
+                }]),
                 "Datos_clave": pd.DataFrame([r.datos_clave]),
+                "Faltantes": pd.DataFrame([{"faltante": x} for x in (r.faltantes or [])]),
                 "Acciones": df_actions,
             }
         )
 
-        c1, c2, c3 = st.columns(3)
+        c1, c2 = st.columns(2)
         with c1:
-            st.download_button("JSON", json_out.encode("utf-8"), "nlp_operacion.json", "application/json")
+            st.download_button("Descargar JSON", json_out.encode("utf-8"), "nlp_corporativo.json", "application/json")
         with c2:
             st.download_button(
-                "Excel",
+                "Descargar Excel",
                 xlsx_bytes,
-                "nlp_operacion.xlsx",
+                "nlp_corporativo.xlsx",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
-        with c3:
-            st.download_button("TXT", txt_out.encode("utf-8"), "nlp_operacion.txt", "text/plain")
 
     except Exception as e:
         if show_maintenance_instead_of_api_error(e):
