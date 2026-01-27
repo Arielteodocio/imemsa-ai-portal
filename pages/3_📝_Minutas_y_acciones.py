@@ -97,38 +97,47 @@ if btn:
             lines.append("No se detectaron acciones.")
         txt_out = "\n".join(lines).strip()
 
-        c1, c2, c3, c4 = st.columns(4)
+        c1, c2, c3, c4, c5 = st.columns(5)
 
-        with c1:
-            st.download_button(
-                "TXT",
-                data=txt_out.encode("utf-8"),
-                file_name="minuta.txt",
-                mime="text/plain",
-            )
+with c1:
+    st.download_button(
+        "TXT",
+        data=txt_out.encode("utf-8"),
+        file_name="minuta.txt",
+        mime="text/plain",
+    )
 
-        with c2:
-            st.download_button(
-                "DOCX",
-                data=to_docx_bytes(result.title, txt_out),
-                file_name="minuta.docx",
-            )
+with c2:
+    st.download_button(
+        "DOCX",
+        data=to_docx_bytes(result.title, txt_out),
+        file_name="minuta.docx",
+    )
 
-        with c3:
-            st.download_button(
-                "PDF",
-                data=to_pdf_bytes(result.title, txt_out),
-                file_name="minuta.pdf",
-                mime="application/pdf",
-            )
+with c3:
+    st.download_button(
+        "PDF",
+        data=to_pdf_bytes(result.title, txt_out),
+        file_name="minuta.pdf",
+        mime="application/pdf",
+    )
 
-        with c4:
-            st.download_button(
-                "CSV (acciones)",
-                data=edited_df.to_csv(index=False).encode("utf-8"),
-                file_name="acciones.csv",
-                mime="text/csv",
-            )
+with c4:
+    st.download_button(
+        "CSV (acciones)",
+        data=edited_df.to_csv(index=False).encode("utf-8"),
+        file_name="acciones.csv",
+        mime="text/csv",
+    )
+
+with c5:
+    st.download_button(
+        "Excel (acciones)",
+        data=actions_to_xlsx_bytes(edited_df),
+        file_name="acciones.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
 
     except Exception as e:
         if show_maintenance_instead_of_api_error(e):
