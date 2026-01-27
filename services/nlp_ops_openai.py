@@ -8,11 +8,14 @@ from openai import OpenAI
 
 @dataclass
 class NlpOpsResult:
-    categoria: str
-    severidad: str
+    area: str
+    tipo_solicitud: str
+    prioridad: str
+    motivo_prioridad: str
     resumen: str
     acciones: List[Dict[str, Any]]
     datos_clave: Dict[str, Any]
+    faltantes: List[str]
     modelo: str
 
 
@@ -26,51 +29,67 @@ def _get_api_key() -> str:
 def analyze_ticket(texto: str) -> NlpOpsResult:
     client = OpenAI(api_key=_get_api_key())
 
+    # ✅ Reglas corporativas IMEMSA (las que nos diste)
     instructions = (
-        "Eres un asistente NLP para operaciones industriales.\n"
-        "Tu tarea es analizar un ticket/reporte y devolver SOLO JSON valido.\n"
-        "Reglas:\n"
-        "- No inventes. Si no hay dato, usa null o ''.\n"
-        "- Mantén tono profesional.\n"
+        "Eres un asistente NLP para corporativo.\n"
+        "Analiza solicitudes (correo/ticket) y devuelve SOLO JSON valido.\n\n"
+        "REGLAS CLAVE:\n"
+        "- Prioridad 'Critica' cuando el texto indique 'impacta' (operacion, embarque, cierre, cobranza, paro, penalizacion).\n"
+        "- Tesoreria: para pagos, son obligatorios Factura y OC. Si falta alguno, listalo en 'faltantes'.\n"
+        "- Comercial: el caso mas comun es 'Cotizacion'.\n"
+        "- No inventes datos. Si no existe, usa null o ''.\n\n"
         "Devuelve este JSON:\n"
         "{\n"
-        '  "categoria": "Calidad|Mantenimiento|Produccion|Compras|Logistica|Seguridad|TI|Otro",\n'
-        '  "severidad": "Baja|Media|Alta|Critica",\n'
+        '  "area": "Comercial|Finanzas|Contabilidad|Tesoreria|RRHH|TI|Legal|Direccion|Otro",\n'
+        '  "tipo_solicitud": "Cotizacion|Pago|Factura_CFDI|Nomina_Incidencia|Alta_Baja|Soporte_TI|Otro",\n'
+        '  "prioridad": "Baja|Media|Alta|Critica",\n'
+        '  "motivo_prioridad": "...",\n'
         '  "resumen": "...",\n'
+        '  "datos_clave": {\n'
+        '     "cliente": "...",\n'
+        '     "proveedor": "...",\n'
+        '     "factura": "...",\n'
+        '     "oc": "...",\n'
+        '     "monto": "...",\n'
+        '     "moneda": "...",\n'
+        '     "fecha_limite": "...",\n'
+        '     "contacto": "..."\n'
+        "  },\n"
+        '  "faltantes": ["..."],\n'
         '  "acciones": [\n'
         '     {"accion":"...", "responsable_sugerido":"...", "prioridad":"Alta|Media|Baja", "plazo_sugerido":"..."}\n'
-        "  ],\n"
-        '  "datos_clave": {\n'
-        '     "area": "...",\n'
-        '     "equipo": "...",\n'
-        '     "turno": "...",\n'
-        '     "fecha": "...",\n'
-        '     "impacto": "...",\n'
-        '     "palabras_clave": ["..."]\n'
-        "  }\n"
+        "  ]\n"
         "}\n"
     )
 
     resp = client.responses.create(
         model="gpt-4o-mini",
         instructions=instructions,
-        input=[
-            {
-                "role": "user",
-                "content": [{"type": "input_text", "text": f"Ticket:\n{texto}"}],
-            }
-        ],
+        input=[{"role": "user", "content": [{"type": "input_text", "text": f"Solicitud:\n{texto}"}]}],
         text={"format": {"type": "json_object"}},
     )
 
     raw = (resp.output_text or "").strip()
     data = json.loads(raw)
 
+    # Normalización ligera para evitar vacíos raros
+    faltantes = data.get("faltantes", []) or []
+    if not isinstance(faltantes, list):
+        faltantes = [str(faltantes)]
+
+    acciones = data.get("acciones", []) or []
+    if not isinstance(acciones, list):
+        acciones = []
+
     return NlpOpsResult(
-        categoria=str(data.get("categoria", "") or ""),
-        severidad=str(data.get("severidad", "") or ""),
+        area=str(data.get("area", "") or ""),
+        tipo_solicitud=str(data.get("tipo_solicitud", "") or ""),
+        prioridad=str(data.get("prioridad", "") or ""),
+        motivo_prioridad=str(data.get("motivo_prioridad", "") or ""),
         resumen=str(data.get("resumen", "") or ""),
-        acciones=list(data.get("acciones", []) or []),
         datos_clave=dict(data.get("datos_clave", {}) or {}),
+        faltantes=[str(x) for x in faltantes],
+        acciones=acciones,
         modelo="gpt-4o-mini",
     )
+
