@@ -2,10 +2,8 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 
-
 from services.forecast_anomaly import run_forecast_and_anomaly
 from utils_excel_multi import to_xlsx_multiple_sheets
-from utils_errors import MAINTENANCE_MSG, show_maintenance_instead_of_api_error
 
 st.set_page_config(page_title="Forecast y Anomalías", page_icon="📈", layout="wide")
 
@@ -47,7 +45,6 @@ try:
     with c3:
         freq = st.selectbox("Frecuencia", ["D", "W", "M"], index=0, help="D=diario, W=semanal, M=mensual")
 
-    # Params
     c4, c5, c6 = st.columns(3)
     with c4:
         periods = st.number_input("Horizonte (periodos a predecir)", min_value=1, max_value=365, value=30)
@@ -59,7 +56,7 @@ try:
     btn = st.button("Generar forecast y anomalías", type="primary")
 
     if btn:
-        # Normaliza fecha
+        # Normaliza
         df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
         df_clean = df.dropna(subset=[date_col, value_col]).copy()
         df_clean[value_col] = pd.to_numeric(df_clean[value_col], errors="coerce")
@@ -81,14 +78,17 @@ try:
             )
 
         st.success("Listo ✅")
+
+        # -----------------------
+        # Gráfica 1: Histórico + Forecast
+        # -----------------------
         st.subheader("Gráfica: Histórico + Forecast")
 
-        hist_plot = df_clean[[date_col, value_col]].copy()
-        hist_plot = hist_plot.sort_values(date_col)
-        
+        hist_plot = df_clean[[date_col, value_col]].copy().sort_values(date_col)
+
         fc_plot = out.forecast_df.copy()
-        fc_plot[date_col] = pd.to_datetime(fc_plot[date_col])
-        
+        fc_plot[date_col] = pd.to_datetime(fc_plot[date_col], errors="coerce")
+
         fig1 = plt.figure()
         plt.plot(hist_plot[date_col], hist_plot[value_col], label="Histórico")
         plt.plot(fc_plot[date_col], fc_plot["forecast"], label="Forecast")
@@ -96,26 +96,26 @@ try:
         plt.ylabel(value_col)
         plt.legend()
         st.pyplot(fig1)
-        
+
         # -----------------------
         # Gráfica 2: Anomalías
         # -----------------------
         st.subheader("Gráfica: Anomalías detectadas")
-        
+
         anom_plot = out.anomalies_df.copy()
-        anom_plot[date_col] = pd.to_datetime(anom_plot[date_col], errors="coerce")
-        
+        if not anom_plot.empty:
+            anom_plot[date_col] = pd.to_datetime(anom_plot[date_col], errors="coerce")
+
         fig2 = plt.figure()
         plt.plot(hist_plot[date_col], hist_plot[value_col], label="Histórico")
-        
         if not anom_plot.empty:
             plt.scatter(anom_plot[date_col], anom_plot[value_col], label="Anomalías")
-        
         plt.xlabel("Fecha")
         plt.ylabel(value_col)
-plt.legend()
+        plt.legend()
         st.pyplot(fig2)
 
+        # Tablas
         st.subheader("Forecast")
         st.dataframe(out.forecast_df, use_container_width=True)
 
@@ -125,7 +125,7 @@ plt.legend()
         else:
             st.dataframe(out.anomalies_df, use_container_width=True)
 
-        # Export
+        # Exportar Excel
         st.subheader("Exportar")
         xlsx_bytes = to_xlsx_multiple_sheets(
             {
@@ -141,9 +141,6 @@ plt.legend()
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 
-except Exception as e:
-    # Si falla algo del archivo o parsing, no queremos “mantenimiento”
-    if show_maintenance_instead_of_api_error(e):
-        st.warning(MAINTENANCE_MSG)
-    else:
-        st.error("Ocurrió un error al procesar el archivo. Revisa el formato e intenta de nuevo.")
+except Exception:
+    st.error("Ocurrió un error al procesar el archivo. Revisa el formato e intenta de nuevo.")
+
