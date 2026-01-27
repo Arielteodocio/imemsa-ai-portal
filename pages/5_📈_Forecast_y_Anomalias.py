@@ -1,5 +1,7 @@
 import pandas as pd
 import streamlit as st
+import matplotlib.pyplot as plt
+
 
 from services.forecast_anomaly import run_forecast_and_anomaly
 from utils_excel_multi import to_xlsx_multiple_sheets
@@ -79,6 +81,40 @@ try:
             )
 
         st.success("Listo ✅")
+        st.subheader("Gráfica: Histórico + Forecast")
+
+        hist_plot = df_clean[[date_col, value_col]].copy()
+        hist_plot = hist_plot.sort_values(date_col)
+        
+        fc_plot = out.forecast_df.copy()
+        fc_plot[date_col] = pd.to_datetime(fc_plot[date_col])
+        
+        fig1 = plt.figure()
+        plt.plot(hist_plot[date_col], hist_plot[value_col], label="Histórico")
+        plt.plot(fc_plot[date_col], fc_plot["forecast"], label="Forecast")
+        plt.xlabel("Fecha")
+        plt.ylabel(value_col)
+        plt.legend()
+        st.pyplot(fig1)
+        
+        # -----------------------
+        # Gráfica 2: Anomalías
+        # -----------------------
+        st.subheader("Gráfica: Anomalías detectadas")
+        
+        anom_plot = out.anomalies_df.copy()
+        anom_plot[date_col] = pd.to_datetime(anom_plot[date_col], errors="coerce")
+        
+        fig2 = plt.figure()
+        plt.plot(hist_plot[date_col], hist_plot[value_col], label="Histórico")
+        
+        if not anom_plot.empty:
+            plt.scatter(anom_plot[date_col], anom_plot[value_col], label="Anomalías")
+        
+        plt.xlabel("Fecha")
+        plt.ylabel(value_col)
+plt.legend()
+        st.pyplot(fig2)
 
         st.subheader("Forecast")
         st.dataframe(out.forecast_df, use_container_width=True)
