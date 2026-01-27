@@ -4,6 +4,7 @@ import streamlit as st
 from services.minutes_openai import generate_minutes
 from utils_export import to_docx_bytes, to_pdf_bytes
 from utils_errors import MAINTENANCE_MSG, show_maintenance_instead_of_api_error
+from utils_excel import actions_to_xlsx_bytes
 
 st.set_page_config(page_title="Minutas y acciones", page_icon="📝", layout="wide")
 
