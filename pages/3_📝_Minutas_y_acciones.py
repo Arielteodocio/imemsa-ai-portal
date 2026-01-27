@@ -1,5 +1,7 @@
 import pandas as pd
 import streamlit as st
+from utils_auth import require_password
+require_password()
 
 from services.minutes_openai import generate_minutes
 from utils_export import to_docx_bytes, to_pdf_bytes
