@@ -51,5 +51,8 @@ if btn:
                 mime="application/pdf",
             )
 
-    except Exception as e:
-        st.error(f"Error: {e}")
+   except Exception as e:
+        if show_maintenance_instead_of_api_error(e):
+            st.warning(MAINTENANCE_MSG)
+        else:
+            st.error(f"Error: {e}")
