@@ -6,7 +6,7 @@ from utils_export import to_docx_bytes, to_pdf_bytes
 
 st.set_page_config(page_title="Transcripción", page_icon="🎧", layout="wide")
 
-st.title("🎧 Transcripción de Audio a Texto (Traducción)")
+st.title("🎧 Transcripción de Audio a Texto")
 st.caption(
     "Carga un archivo de audio y obtén la transcripción en texto. "
     "Entrega el contenido transcrito listo para copiar o exportar."
