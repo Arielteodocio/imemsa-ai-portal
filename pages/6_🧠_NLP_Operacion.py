@@ -101,8 +101,14 @@ if btn:
             )
 
     except Exception as e:
+        print("NLP_CORP_ERROR:", repr(e))
+
         if show_maintenance_instead_of_api_error(e):
             st.warning(MAINTENANCE_MSG)
         else:
             st.error("Ocurrió un error inesperado. Contacta al administrador del portal.")
+
+            if str(st.secrets.get("DEBUG", "false")).lower() == "true":
+                with st.expander("🛠️ Detalle técnico (solo admin)", expanded=False):
+                    st.exception(e)
 
