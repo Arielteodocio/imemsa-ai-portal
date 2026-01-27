@@ -22,14 +22,13 @@ class NlpOpsResult:
 def _get_api_key() -> str:
     key = os.getenv("OPENAI_API_KEY", "").strip()
     if not key:
-        raise RuntimeError("Falta OPENAI_API_KEY. Configuralo en Streamlit Secrets.")
+        raise RuntimeError("Falta OPENAI_API_KEY. Configúralo en Streamlit Secrets.")
     return key
 
 
 def analyze_ticket(texto: str) -> NlpOpsResult:
     client = OpenAI(api_key=_get_api_key())
 
-    # ✅ Reglas corporativas IMEMSA (las que nos diste)
     instructions = (
         "Eres un asistente NLP para corporativo.\n"
         "Analiza solicitudes (correo/ticket) y devuelve SOLO JSON valido.\n\n"
@@ -70,25 +69,43 @@ def analyze_ticket(texto: str) -> NlpOpsResult:
     )
 
     raw = (resp.output_text or "").strip()
-    data = json.loads(raw)
+    if not raw:
+        raise RuntimeError("Respuesta vacía del modelo (output_text).")
 
-    # Normalización ligera para evitar vacíos raros
+    try:
+        data = json.loads(raw)
+    except Exception as ex:
+        raise RuntimeError(f"JSON inválido devuelto por el modelo: {raw[:300]}") from ex
+
+    # ✅ Normalizaciones defensivas
+    area = str(data.get("area", "") or "")
+    tipo = str(data.get("tipo_solicitud", "") or "")
+    prioridad = str(data.get("prioridad", "") or "")
+    motivo = str(data.get("motivo_prioridad", "") or "")
+    resumen = str(data.get("resumen", "") or "")
+
+    datos = data.get("datos_clave", {}) or {}
+    if not isinstance(datos, dict):
+        datos = {}
+
     faltantes = data.get("faltantes", []) or []
     if not isinstance(faltantes, list):
         faltantes = [str(faltantes)]
+    faltantes = [str(x) for x in faltantes]
 
     acciones = data.get("acciones", []) or []
     if not isinstance(acciones, list):
         acciones = []
+    acciones = [a for a in acciones if isinstance(a, dict)]
 
     return NlpOpsResult(
-        area=str(data.get("area", "") or ""),
-        tipo_solicitud=str(data.get("tipo_solicitud", "") or ""),
-        prioridad=str(data.get("prioridad", "") or ""),
-        motivo_prioridad=str(data.get("motivo_prioridad", "") or ""),
-        resumen=str(data.get("resumen", "") or ""),
-        datos_clave=dict(data.get("datos_clave", {}) or {}),
-        faltantes=[str(x) for x in faltantes],
+        area=area,
+        tipo_solicitud=tipo,
+        prioridad=prioridad,
+        motivo_prioridad=motivo,
+        resumen=resumen,
+        datos_clave=datos,
+        faltantes=faltantes,
         acciones=acciones,
         modelo="gpt-4o-mini",
     )
