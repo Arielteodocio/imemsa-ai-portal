@@ -30,36 +30,38 @@ def analyze_ticket(texto: str) -> NlpOpsResult:
     client = OpenAI(api_key=_get_api_key())
 
     instructions = (
-        "Eres un asistente NLP para corporativo.\n"
-        "Analiza solicitudes (correo/ticket) y devuelve SOLO JSON valido.\n\n"
-        "REGLAS CLAVE:\n"
-        "- Prioridad 'Critica' cuando el texto indique 'impacta' (operacion, embarque, cierre, cobranza, paro, penalizacion).\n"
-        "- Tesoreria: para pagos, son obligatorios Factura y OC. Si falta alguno, listalo en 'faltantes'.\n"
-        "- Comercial: el caso mas comun es 'Cotizacion'.\n"
-        "- No inventes datos. Si no existe, usa null o ''.\n\n"
-        "Devuelve este JSON:\n"
-        "{\n"
-        '  "area": "Comercial|Finanzas|Contabilidad|Tesoreria|RRHH|TI|Legal|Direccion|Otro",\n'
-        '  "tipo_solicitud": "Cotizacion|Pago|Factura_CFDI|Nomina_Incidencia|Alta_Baja|Soporte_TI|Otro",\n'
-        '  "prioridad": "Baja|Media|Alta|Critica",\n'
-        '  "motivo_prioridad": "...",\n'
-        '  "resumen": "...",\n'
-        '  "datos_clave": {\n'
-        '     "cliente": "...",\n'
-        '     "proveedor": "...",\n'
-        '     "factura": "...",\n'
-        '     "oc": "...",\n'
-        '     "monto": "...",\n'
-        '     "moneda": "...",\n'
-        '     "fecha_limite": "...",\n'
-        '     "contacto": "..."\n'
-        "  },\n"
-        '  "faltantes": ["..."],\n'
-        '  "acciones": [\n'
-        '     {"accion":"...", "responsable_sugerido":"...", "prioridad":"Alta|Media|Baja", "plazo_sugerido":"..."}\n'
-        "  ]\n"
-        "}\n"
+    "Eres un asistente NLP para corporativo.\n"
+    "Analiza solicitudes (correo/ticket) y devuelve SOLO JSON valido (formato json).\n"
+    "IMPORTANTE: responde en JSON (json) estricto, sin texto extra.\n\n"
+    "REGLAS CLAVE:\n"
+    "- Prioridad 'Critica' cuando el texto indique 'impacta' (operacion, embarque, cierre, cobranza, paro, penalizacion).\n"
+    "- Tesoreria: para pagos, son obligatorios Factura y OC. Si falta alguno, listalo en 'faltantes'.\n"
+    "- Comercial: el caso mas comun es 'Cotizacion'.\n"
+    "- No inventes datos. Si no existe, usa null o ''.\n\n"
+    "Devuelve este JSON:\n"
+    "{\n"
+    '  "area": "Comercial|Finanzas|Contabilidad|Tesoreria|RRHH|TI|Legal|Direccion|Otro",\n'
+    '  "tipo_solicitud": "Cotizacion|Pago|Factura_CFDI|Nomina_Incidencia|Alta_Baja|Soporte_TI|Otro",\n'
+    '  "prioridad": "Baja|Media|Alta|Critica",\n'
+    '  "motivo_prioridad": "...",\n'
+    '  "resumen": "...",\n'
+    '  "datos_clave": {\n'
+    '     "cliente": "...",\n'
+    '     "proveedor": "...",\n'
+    '     "factura": "...",\n'
+    '     "oc": "...",\n'
+    '     "monto": "...",\n'
+    '     "moneda": "...",\n'
+    '     "fecha_limite": "...",\n'
+    '     "contacto": "..."\n'
+    "  },\n"
+    '  "faltantes": ["..."],\n'
+    '  "acciones": [\n'
+    '     {"accion":"...", "responsable_sugerido":"...", "prioridad":"Alta|Media|Baja", "plazo_sugerido":"..."}\n'
+    "  ]\n"
+    "}\n"
     )
+
 
     resp = client.responses.create(
         model="gpt-4o-mini",
