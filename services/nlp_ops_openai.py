@@ -64,11 +64,23 @@ def analyze_ticket(texto: str) -> NlpOpsResult:
 
 
     resp = client.responses.create(
-        model="gpt-4o-mini",
-        instructions=instructions,
-        input=[{"role": "user", "content": [{"type": "input_text", "text": f"Solicitud:\n{texto}"}]}],
-        text={"format": {"type": "json_object"}},
+    model="gpt-4o-mini",
+    instructions=instructions,
+    input=[
+        {
+            "role": "system",
+            "content": [
+                {"type": "input_text", "text": "Responde en formato json (JSON) estricto, sin texto extra."}
+            ],
+        },
+        {
+            "role": "user",
+            "content": [{"type": "input_text", "text": f"Solicitud:\n{texto}"}],
+        },
+    ],
+    text={"format": {"type": "json_object"}},
     )
+
 
     raw = (resp.output_text or "").strip()
     if not raw:
