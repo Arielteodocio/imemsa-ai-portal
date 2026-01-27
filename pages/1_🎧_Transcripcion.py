@@ -1,5 +1,7 @@
 import time
 import streamlit as st
+from utils_auth import require_password
+require_password()
 
 from services.transcribe_openai import transcribe_audio_bytes
 from utils_export import to_docx_bytes, to_pdf_bytes
