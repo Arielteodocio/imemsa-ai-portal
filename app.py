@@ -2,6 +2,14 @@ import streamlit as st
 
 st.set_page_config(page_title="IMEMSA AI Portal", page_icon="🤖", layout="wide")
 
+
+import streamlit as st
+
+st.set_page_config(page_title="IMEMSA AI Portal", page_icon="🤖", layout="wide")
+
+st.image("imemsa_logo.png", width=220)
+st.title("IMEMSA AI Portal")
+
 st.title("🤖 IMEMSA AI Portal")
 st.caption("Portal interno: Transcripción | Traducción | Minutas | Documentos | Forecast | NLP Operación")
 
