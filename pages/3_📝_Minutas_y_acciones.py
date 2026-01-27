@@ -49,17 +49,16 @@ if btn:
 
         st.subheader("Acciones")
         actions = result.actions or []
+
         if actions:
             df = pd.DataFrame(actions)
 
-            # Normaliza columnas esperadas
             expected_cols = ["accion", "responsable", "fecha_compromiso", "prioridad", "area", "notas"]
             for c in expected_cols:
                 if c not in df.columns:
                     df[c] = None
             df = df[expected_cols]
 
-            # Muestra tabla editable (opcional)
             edited_df = st.data_editor(df, use_container_width=True, num_rows="dynamic")
         else:
             st.info("No se detectaron acciones explícitas.")
@@ -68,7 +67,6 @@ if btn:
         # ---- Exportables
         st.subheader("Exportar")
 
-        # TXT (formato legible)
         lines = []
         lines.append(result.title)
         lines.append("")
@@ -99,48 +97,48 @@ if btn:
 
         c1, c2, c3, c4, c5 = st.columns(5)
 
-with c1:
-    st.download_button(
-        "TXT",
-        data=txt_out.encode("utf-8"),
-        file_name="minuta.txt",
-        mime="text/plain",
-    )
+        with c1:
+            st.download_button(
+                "TXT",
+                data=txt_out.encode("utf-8"),
+                file_name="minuta.txt",
+                mime="text/plain",
+            )
 
-with c2:
-    st.download_button(
-        "DOCX",
-        data=to_docx_bytes(result.title, txt_out),
-        file_name="minuta.docx",
-    )
+        with c2:
+            st.download_button(
+                "DOCX",
+                data=to_docx_bytes(result.title, txt_out),
+                file_name="minuta.docx",
+            )
 
-with c3:
-    st.download_button(
-        "PDF",
-        data=to_pdf_bytes(result.title, txt_out),
-        file_name="minuta.pdf",
-        mime="application/pdf",
-    )
+        with c3:
+            st.download_button(
+                "PDF",
+                data=to_pdf_bytes(result.title, txt_out),
+                file_name="minuta.pdf",
+                mime="application/pdf",
+            )
 
-with c4:
-    st.download_button(
-        "CSV (acciones)",
-        data=edited_df.to_csv(index=False).encode("utf-8"),
-        file_name="acciones.csv",
-        mime="text/csv",
-    )
+        with c4:
+            st.download_button(
+                "CSV (acciones)",
+                data=edited_df.to_csv(index=False).encode("utf-8"),
+                file_name="acciones.csv",
+                mime="text/csv",
+            )
 
-with c5:
-    st.download_button(
-        "Excel (acciones)",
-        data=actions_to_xlsx_bytes(edited_df),
-        file_name="acciones.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
-
+        with c5:
+            st.download_button(
+                "Excel (acciones)",
+                data=actions_to_xlsx_bytes(edited_df),
+                file_name="acciones.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
 
     except Exception as e:
         if show_maintenance_instead_of_api_error(e):
             st.warning(MAINTENANCE_MSG)
         else:
             st.error("Ocurrió un error inesperado. Contacta al administrador del portal.")
+
