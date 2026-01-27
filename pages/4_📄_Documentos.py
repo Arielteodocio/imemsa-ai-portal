@@ -22,7 +22,7 @@ st.caption(
 
 with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
     st.write(
-        "- El documento se procesa en la nube y se devuelve el texto y campos.\n"
+        "- El documento se procesa y se devuelve el texto y campos.\n"
         "- No guardamos el archivo.\n"
         "- Puedes exportar el resultado."
     )
