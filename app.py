@@ -1,4 +1,6 @@
 import streamlit as st
+from utils_auth import require_password
+require_password()
 
 st.set_page_config(page_title="IMEMSA AI Portal", page_icon="🤖", layout="wide")
 
