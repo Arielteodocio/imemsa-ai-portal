@@ -1,5 +1,7 @@
 import json
 from io import BytesIO
+from utils_auth import require_password
+require_password()
 
 import pandas as pd
 import streamlit as st
