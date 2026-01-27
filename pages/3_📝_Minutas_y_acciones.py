@@ -18,7 +18,7 @@ st.caption(
 
 with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
     st.write(
-        "- El texto se procesa en la nube y se devuelven resultados estructurados.\n"
+        "- El texto se procesa y se devuelven resultados estructurados.\n"
         "- No guardamos la transcripción ni la minuta.\n"
         "- Puedes exportar la información a tus formatos."
     )
