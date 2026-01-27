@@ -1,0 +1,20 @@
+streamlit>=1.31
+python-dotenv>=1.0.1
+
+pandas>=2.0
+numpy>=1.26
+
+python-docx>=1.1.0
+reportlab>=4.2.0
+
+# Si usarás auth con Entra más adelante:
+msal>=1.26.0
+pyjwt>=2.8.0
+
+# OCR/Documentos (elige según lo que implementemos):
+pytesseract>=0.3.10
+pillow>=10.0
+
+# ML Forecast/Anomalías:
+scikit-learn>=1.4
+statsmodels>=0.14
