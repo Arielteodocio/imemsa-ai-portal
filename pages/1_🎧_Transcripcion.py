@@ -17,7 +17,7 @@ st.caption(
 
 with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
     st.write(
-        "- El audio se procesa en la nube y se devuelve el texto.\n"
+        "- El audio se procesa y se devuelve el texto.\n"
         "- No guardamos el archivo ni la transcripción.\n"
         "- Solo se utiliza un archivo temporal durante la transcripción."
     )
