@@ -21,7 +21,7 @@ with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
 
 # ✅ Configuración fija (sin opciones al usuario)
 MODEL = "gpt-4o-mini-transcribe"
-LANGUAGE_HINT = "auto"
+LANGUAGE_HINT = "es"
 PROMPT = (
     "El audio es de un contexto industrial/operativo. "
     "Conserva siglas y términos técnicos. "
