@@ -1,6 +1,6 @@
 import streamlit as st
 
 st.title("🧠 NLP para operación")
-st.caption("Pega o carga texto operativo (tickets, correos o reportes) y clasifícalo por tipo de tema. Además, extrae acciones y estima la severidad para entregar un resumen priorizado para atención.")
+st.caption("Pega un ticket, correo o reporte y el sistema lo entiende por ti: lo clasifica por tema, saca las acciones y te dice qué tan urgente es. Entrega un resumen listo para priorizar y dar seguimiento.")
 
 st.info("Aquí construiremos: pegar texto → clasificar → acciones → export.")
