@@ -20,7 +20,7 @@ def require_password() -> None:
 
     correct = str(st.secrets.get("APP_PASSWORD", "imemsa26"))
 
-    st.title("🔒 Acceso al Portal IMEMSA")
+    st.title("🔒 Acceso al Portafolio de Herramientas Imemsa")
     st.caption("Ingresa la contraseña para continuar.")
 
     pwd = st.text_input("Contraseña", type="password")
