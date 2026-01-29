@@ -13,7 +13,7 @@ st.set_page_config(page_title="NLP Corporativo", page_icon="🧠", layout="wide"
 st.title("🧠 NLP Corporativo (Clasificación y priorización)")
 st.caption(
     "Clasifica solicitudes internas correo, asigna área destino, estima prioridad y extrae datos clave. "
-    "Incluye validación para Tesorería: Factura + OC."
+    "  "
 )
 
 texto = st.text_area(
