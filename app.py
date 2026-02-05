@@ -22,10 +22,9 @@ require_password()
 # Estado de navegación
 # home | tools | agents
 # ----------------------------
-if "section" not in st.session_state:
+
+if "section" not in st.session_state or st.session_state.section not in ["home", "tools", "agents"]:
     st.session_state.section = "home"
-
-
 # ----------------------------
 # Helpers UI
 # ----------------------------
