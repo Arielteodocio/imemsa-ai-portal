@@ -1,275 +1,183 @@
 import streamlit as st
-from utils_auth import require_password
+
 from utils_ui import hide_streamlit_sidebar_pages
 
-hide_streamlit_sidebar_pages()
-
-# ----------------------------
-# Config general
-# ----------------------------
+# =========================
+# Config
+# =========================
 st.set_page_config(
     page_title="IMEMSA | Portafolio de IA",
     page_icon="🤖",
     layout="wide",
 )
 
-# ----------------------------
-# Auth (password gate)
-# ----------------------------
-require_password()
+hide_streamlit_sidebar_pages()
 
-# ----------------------------
-# Post-login normalization
-# ----------------------------
-# Si acaba de loguearse: SIEMPRE aterriza en HOME
-if st.session_state.get("just_logged_in", False):
-    st.session_state.section = "home"
-    st.session_state.just_logged_in = False
-
-# Normaliza section
-if "section" not in st.session_state or st.session_state.section not in ["home", "tools", "agents"]:
-    st.session_state.section = "home"
+APP_PASSWORD = "imemsa26"  # recomendado: pásalo a st.secrets (abajo te digo cómo)
 
 
-# ----------------------------
-# UI helpers
-# ----------------------------
-def hide_sidebar():
-    st.markdown(
-        """
-        <style>
-          [data-testid="stSidebar"] {display: none;}
-          [data-testid="stSidebarNav"] {display: none;}
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+# =========================
+# Helpers
+# =========================
+def ensure_session_defaults():
+    if "auth_ok" not in st.session_state:
+        st.session_state.auth_ok = False
+    if "route" not in st.session_state:
+        # "home" = tablero / "inicio" = landing opcional
+        st.session_state.route = "home"
 
 
-def top_brand():
-    # Logo (si existe)
+def logout():
+    st.session_state.auth_ok = False
+    st.session_state.route = "home"
+    st.rerun()
+
+
+def sidebar_nav():
+    """Sidebar único (sin lista automática de páginas)."""
+    with st.sidebar:
+        st.markdown("### Navegación")
+
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("🧰 Tablero", use_container_width=True):
+                st.session_state.route = "home"
+                st.rerun()
+        with c2:
+            if st.button("🏠 Inicio", use_container_width=True):
+                st.session_state.route = "home"
+                st.rerun()
+
+        st.markdown("---")
+        st.button("Cerrar sesión", on_click=logout, use_container_width=True)
+
+
+def require_auth():
+    ensure_session_defaults()
+    if st.session_state.auth_ok:
+        return True
+
+    # Pantalla de acceso
+    st.markdown("## 🔒 Acceso al Portal IMEMSA")
+    st.caption("Ingresa la contraseña para continuar.")
+
+    col1, col2 = st.columns([2, 3])
+    with col1:
+        pwd = st.text_input("Contraseña", type="password")
+        if st.button("Entrar"):
+            if pwd == APP_PASSWORD:
+                st.session_state.auth_ok = True
+                st.rerun()
+            else:
+                st.error("Contraseña incorrecta.")
+    with col2:
+        st.info("Si no cuentas con acceso, contacta al administrador del portal.")
+
+    st.stop()
+
+
+def card(title, icon, desc, tags, page_path):
+    """Tarjeta clickeable estilo mini-tablero."""
+    with st.container(border=True):
+        st.markdown(f"### {icon} {title}")
+        st.write(desc)
+
+        if tags:
+            st.caption(" · ".join(tags))
+
+        st.markdown("")
+        if st.button("Abrir", key=f"open_{page_path}", use_container_width=True):
+            # OJO: page_path debe coincidir con el archivo real en /pages
+            st.switch_page(page_path)
+
+
+# =========================
+# App
+# =========================
+ensure_session_defaults()
+require_auth()
+sidebar_nav()
+
+# --- Header principal
+col_logo, col_title = st.columns([1, 5], vertical_alignment="center")
+with col_logo:
     try:
         st.image("imemsa_logo.png", width=180)
     except Exception:
-        st.markdown("### IMEMSA")
+        pass
 
-
-def tools_sidebar_controls():
-    """
-    Sidebar para cuando estamos en Tools:
-    - Tablero (tools home)
-    - Inicio (home)
-    - Cerrar sesión
-    """
-    with st.sidebar:
-        st.markdown("### Navegación")
-        if st.button("🧰 Tablero", use_container_width=True):
-            st.session_state.section = "tools"
-            st.rerun()
-
-        if st.button("🏠 Inicio", use_container_width=True):
-            st.session_state.section = "home"
-            st.rerun()
-
-        st.divider()
-
-        if st.button("Cerrar sesión", use_container_width=True):
-            st.session_state.authenticated = False
-            st.session_state.section = "home"
-            st.rerun()
-
-
-def pill(text: str):
-    st.markdown(
-        f"""
-        <span style="
-          display:inline-block;
-          padding: 4px 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(255,255,255,0.18);
-          background: rgba(255,255,255,0.06);
-          font-size: 0.78rem;
-          opacity: 0.95;
-          margin-right: 6px;
-          margin-bottom: 6px;
-        ">{text}</span>
-        """,
-        unsafe_allow_html=True,
+with col_title:
+    st.markdown("# 🤖 Portafolio de Herramientas de IA")
+    st.write(
+        "👋 **¡Bienvenido!** Este portal reúne herramientas de IA diseñadas para ayudarte a **trabajar más rápido**, "
+        "**reducir tareas repetitivas** y **mejorar la calidad de tus entregables**.\n\n"
+        "Explora las herramientas del tablero y elige la que necesites."
     )
 
+st.markdown("---")
 
-# ----------------------------
-# Screens
-# ----------------------------
-def home_screen():
-    hide_sidebar()
+st.markdown("## 🧰 Herramientas de IA")
+st.caption("Selecciona una herramienta para comenzar. También puedes volver aquí desde el menú lateral.")
 
-    top_brand()
-
-    st.markdown("## 🤖 Portafolio de Herramientas de IA")
-    st.markdown(
-        """
-        👋 **¡Bienvenido!**  
-        Este portal reúne herramientas de Inteligencia Artificial diseñadas para ayudarte a **trabajar más rápido**,  
-        **reducir tareas repetitivas** y **mejorar la calidad** de tus entregables.
-
-        Te invitamos a probar los módulos disponibles.  
-        Si tienes sugerencias o detectas oportunidades de mejora, compártelas para seguir evolucionando el portafolio.
-        """
+# --- GRID de tarjetas
+# Ajusta los paths según tus nombres exactos en /pages
+# Tip: en Streamlit, los paths se escriben así: "pages/1_Transcripcion.py"
+c1, c2, c3 = st.columns(3)
+with c1:
+    card(
+        title="Transcripción",
+        icon="🎧",
+        desc="Convierte audio en español a texto listo para copiar o exportar.",
+        tags=["Operación", "Administrativo"],
+        page_path="pages/1_🎧_Transcripcion.py",
     )
 
-    st.write("")
-    st.write("")
-
-    c1, c2 = st.columns(2, gap="large")
-
-    with c1:
-        st.markdown("### 🧰 Herramientas de IA")
-        st.caption("Accede a los módulos disponibles para uso diario.")
-        if st.button("Entrar a Herramientas", type="primary", use_container_width=True):
-            st.session_state.section = "tools"
-            st.rerun()
-
-    with c2:
-        st.markdown("### 🧠 Agentes de IA")
-        st.caption("Automatizaciones y asistentes inteligentes (próximamente).")
-        if st.button("Ver Agentes (próximamente)", use_container_width=True):
-            st.session_state.section = "agents"
-            st.rerun()
-
-
-def agents_screen():
-    hide_sidebar()
-
-    top_brand()
-    st.markdown("## 🧠 Agentes de IA")
-    st.info(
-        "Esta sección se habilitará en una fase futura. "
-        "Por ahora, utiliza **Herramientas de IA** para acceder a los módulos."
+with c2:
+    card(
+        title="Traducción",
+        icon="🌐",
+        desc="Traduce texto Inglés ↔ Español con formato claro y profesional.",
+        tags=["Administrativo", "Comercial"],
+        page_path="pages/2_🌐_Traduccion.py",
     )
 
-    st.write("")
-    if st.button("⬅️ Volver al inicio", use_container_width=True):
-        st.session_state.section = "home"
-        st.rerun()
-
-
-def tools_dashboard():
-    tools_sidebar_controls()
-
-    top_brand()
-
-    st.markdown("## 🧰 Herramientas de IA")
-    st.caption("Selecciona una herramienta para comenzar. También puedes navegar desde el menú lateral.")
-    st.write("")
-
-    # ---- Cards style ----
-    st.markdown(
-        """
-        <style>
-        .card {
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 18px;
-            padding: 18px 18px 14px 18px;
-            background: rgba(255,255,255,0.04);
-            min-height: 190px;
-        }
-        .card h3 {
-            margin: 0 0 6px 0;
-            font-size: 1.25rem;
-        }
-        .card p {
-            margin: 0;
-            opacity: 0.86;
-            line-height: 1.35rem;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
+with c3:
+    card(
+        title="Minutas y acciones",
+        icon="📝",
+        desc="Genera minuta estructurada y lista de acciones con responsables y fechas.",
+        tags=["Administrativo", "Dirección"],
+        page_path="pages/3_📝_Minutas_y_acciones.py",
     )
 
-    # ---- Ajusta estos paths EXACTOS a tus archivos en /pages ----
-    modules = [
-        {
-            "title": "Transcripción",
-            "emoji": "🎧",
-            "desc": "Convierte audio en español a texto listo para copiar o exportar.",
-            "chips": ["Operación", "Administrativo"],
-            "page": "pages/1_🎧_Transcripcion.py",
-        },
-        {
-            "title": "Traducción",
-            "emoji": "🌐",
-            "desc": "Traduce texto Inglés ↔ Español con formato claro y profesional.",
-            "chips": ["Administrativo", "Comercial"],
-            "page": "pages/2_🌐_Traduccion.py",
-        },
-        {
-            "title": "Minutas y acciones",
-            "emoji": "📝",
-            "desc": "Genera minuta estructurada y acciones con responsables y fechas.",
-            "chips": ["Administrativo", "Dirección"],
-            "page": "pages/3_📝_Minutas_y_acciones.py",
-        },
-        {
-            "title": "Documentos",
-            "emoji": "📄",
-            "desc": "Extrae información de PDFs/escaneos (OCR) y crea exportables.",
-            "chips": ["Finanzas", "Contabilidad", "Administrativo"],
-            "page": "pages/4_📄_Documentos.py",
-        },
-        {
-            "title": "Forecast y anomalías",
-            "emoji": "📈",
-            "desc": "Pronóstico + detección de desviaciones para análisis rápido.",
-            "chips": ["Finanzas", "Comercial", "Dirección"],
-            "page": "pages/5_📈_Forecast_y_Anomalias.py",
-        },
-        {
-            "title": "NLP Corporativo",
-            "emoji": "🧠",
-            "desc": "Clasifica solicitudes internas, prioridad, área destino y datos clave.",
-            "chips": ["Tesorería", "Comercial", "RRHH"],
-            "page": "pages/6_🧠_NLP_Operacion.py",
-        },
-    ]
+c4, c5, c6 = st.columns(3)
+with c4:
+    card(
+        title="Documentos",
+        icon="📄",
+        desc="Extrae información clave de documentos (PDF/imagen) para revisión y exportables.",
+        tags=["Finanzas", "Tesorería"],
+        page_path="pages/4_📄_Documentos.py",
+    )
 
-    # ---- Grid 3 columnas ----
-    cols = st.columns(3, gap="large")
+with c5:
+    card(
+        title="Forecast y anomalías",
+        icon="📈",
+        desc="Genera pronóstico y detecta anomalías en series de tiempo a partir de un archivo.",
+        tags=["Planeación", "Dirección"],
+        page_path="pages/5_📈_Forecast_y_Anomalias.py",
+    )
 
-    for i, m in enumerate(modules):
-        with cols[i % 3]:
-            st.markdown(
-                f"""
-                <div class="card">
-                  <h3>{m["emoji"]} {m["title"]}</h3>
-                  <p>{m["desc"]}</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+with c6:
+    card(
+        title="NLP Operación",
+        icon="🧠",
+        desc="Clasifica solicitudes (correo/ticket), estima prioridad y extrae datos clave (ej. Factura + OC).",
+        tags=["Tesorería", "Comercial"],
+        page_path="pages/6_🧠_NLP_Operacion.py",
+    )
 
-            # Chips debajo de la card
-            st.write("")
-            for ch in m.get("chips", []):
-                pill(ch)
-
-            st.write("")
-            if st.button("Abrir", key=f"open_{i}", type="primary", use_container_width=True):
-                st.switch_page(m["page"])
-
-
-# ----------------------------
-# Router
-# ----------------------------
-if st.session_state.section == "home":
-    home_screen()
-    st.stop()
-
-if st.session_state.section == "agents":
-    agents_screen()
-    st.stop()
-
-# Tools
-tools_dashboard()
+st.markdown("---")
+st.caption("IMEMSA · Portal interno · v1")
 
