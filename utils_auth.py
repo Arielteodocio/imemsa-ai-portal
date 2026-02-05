@@ -35,7 +35,7 @@ def require_password() -> None:
                 st.error("Contraseña incorrecta. Intenta de nuevo.")
 
     with c2:
-        st.info("Si no cuentas con acceso, contacta al administrador del portal.")
+        st.info("Si no cuentas con acceso, contacta a un integrante del Comite de IA.")
 
     st.stop()
 
