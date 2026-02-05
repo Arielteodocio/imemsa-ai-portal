@@ -23,8 +23,10 @@ require_password()
 # home | tools | agents
 # ----------------------------
 
-if "section" not in st.session_state or st.session_state.section not in ["home", "tools", "agents"]:
+if st.session_state.get("just_logged_in", False):
     st.session_state.section = "home"
+    st.session_state.just_logged_in = False
+
 # ----------------------------
 # Helpers UI
 # ----------------------------
