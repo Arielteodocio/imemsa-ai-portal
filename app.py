@@ -165,16 +165,15 @@ def render_home():
 def tool_card(title, icon, desc, tags, page_path, key):
     st.markdown(
         f"""
-        <div style="border:1px solid rgba(150,150,150,0.25); border-radius:18px; padding:18px; height: 240px;">
+        <div style="border:1px solid rgba(150,150,150,0.25); border-radius:18px; padding:18px; height: 260px;">
           <h3 style="margin:0;">{icon} {title}</h3>
-          <p style="opacity:0.9; margin-top:10px; min-height: 90px;">{desc}</p>
+          <p style="opacity:0.9; margin-top:10px; min-height: 95px;">{desc}</p>
           <p style="opacity:0.7; margin-top:6px; font-size: 0.9rem;">{' · '.join(tags)}</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Botón real (estable) -> navega a pages/...
     if st.button("➡️ Abrir", use_container_width=True, key=f"open_{key}"):
         st.switch_page(page_path)
 
