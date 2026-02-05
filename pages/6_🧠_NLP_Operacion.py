@@ -2,7 +2,15 @@ import json
 import pandas as pd
 import streamlit as st
 from utils_auth import require_password
+
+from utils_nav import require_tools_mode
+
 require_password()
+require_tools_mode()
+
+
+
+
 
 from services.nlp_ops_openai import analyze_ticket
 from utils_excel_multi import to_xlsx_multiple_sheets
