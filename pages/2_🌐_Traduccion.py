@@ -2,12 +2,12 @@ import streamlit as st
 from utils_auth import require_password
 
 
-
-
-from utils_nav import require_tools_mode
+from utils_nav import require_tools_mode, tools_sidebar_controls
 
 require_password()
 require_tools_mode()
+tools_sidebar_controls()
+
 
 
 
