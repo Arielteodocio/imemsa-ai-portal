@@ -1,5 +1,8 @@
 import streamlit as st
 from utils_auth import require_password
+from utils_ui import hide_streamlit_sidebar_pages
+
+hide_streamlit_sidebar_pages()
 
 # ----------------------------
 # Config general
