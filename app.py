@@ -159,4 +159,3 @@ if st.session_state.section == "agents":
 # Si no es home/agents, caemos en tools
 tools_landing_screen()
 
-
