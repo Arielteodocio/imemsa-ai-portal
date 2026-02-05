@@ -1,7 +1,6 @@
 import streamlit as st
 from utils_auth import require_password
 
-
 # ----------------------------
 # Config general
 # ----------------------------
@@ -11,24 +10,26 @@ st.set_page_config(
     layout="wide",
 )
 
-
 # ----------------------------
-# Auth
+# Auth (password gate)
 # ----------------------------
 require_password()
 
-
 # ----------------------------
-# Estado de navegación
-# home | tools | agents
+# Post-login normalization
 # ----------------------------
-
+# Si acaba de loguearse: SIEMPRE aterriza en HOME
 if st.session_state.get("just_logged_in", False):
     st.session_state.section = "home"
     st.session_state.just_logged_in = False
 
+# Normaliza section
+if "section" not in st.session_state or st.session_state.section not in ["home", "tools", "agents"]:
+    st.session_state.section = "home"
+
+
 # ----------------------------
-# Helpers UI
+# UI helpers
 # ----------------------------
 def hide_sidebar():
     st.markdown(
@@ -51,17 +52,47 @@ def top_brand():
 
 
 def tools_sidebar_controls():
-    # Controles extra cuando ya estamos en Tools
+    """
+    Sidebar para cuando estamos en Tools:
+    - Tablero (tools home)
+    - Inicio (home)
+    - Cerrar sesión
+    """
     with st.sidebar:
-        st.divider()
+        st.markdown("### Navegación")
+        if st.button("🧰 Tablero", use_container_width=True):
+            st.session_state.section = "tools"
+            st.rerun()
+
         if st.button("🏠 Inicio", use_container_width=True):
             st.session_state.section = "home"
             st.rerun()
+
+        st.divider()
 
         if st.button("Cerrar sesión", use_container_width=True):
             st.session_state.authenticated = False
             st.session_state.section = "home"
             st.rerun()
+
+
+def pill(text: str):
+    st.markdown(
+        f"""
+        <span style="
+          display:inline-block;
+          padding: 4px 10px;
+          border-radius: 999px;
+          border: 1px solid rgba(255,255,255,0.18);
+          background: rgba(255,255,255,0.06);
+          font-size: 0.78rem;
+          opacity: 0.95;
+          margin-right: 6px;
+          margin-bottom: 6px;
+        ">{text}</span>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 # ----------------------------
@@ -79,7 +110,7 @@ def home_screen():
         Este portal reúne herramientas de Inteligencia Artificial diseñadas para ayudarte a **trabajar más rápido**,  
         **reducir tareas repetitivas** y **mejorar la calidad** de tus entregables.
 
-        Te invitamos a probar las herramientas disponibles.  
+        Te invitamos a probar los módulos disponibles.  
         Si tienes sugerencias o detectas oportunidades de mejora, compártelas para seguir evolucionando el portafolio.
         """
     )
@@ -91,27 +122,14 @@ def home_screen():
 
     with c1:
         st.markdown("### 🧰 Herramientas de IA")
-        st.caption("Accede a los módulos disponibles (Transcripción, Traducción, Minutas, Documentos, Forecast, NLP).")
-
-        # Imagen opcional: si la tienes en el repo (si no existe, no truena)
-        try:
-            st.image("assets/herramientas.png", use_container_width=True)
-        except Exception:
-            pass
-
+        st.caption("Accede a los módulos disponibles para uso diario.")
         if st.button("Entrar a Herramientas", type="primary", use_container_width=True):
             st.session_state.section = "tools"
             st.rerun()
 
     with c2:
         st.markdown("### 🧠 Agentes de IA")
-        st.caption("Sección reservada para agentes/automatizaciones inteligentes (próximamente).")
-
-        try:
-            st.image("assets/agentes.png", use_container_width=True)
-        except Exception:
-            pass
-
+        st.caption("Automatizaciones y asistentes inteligentes (próximamente).")
         if st.button("Ver Agentes (próximamente)", use_container_width=True):
             st.session_state.section = "agents"
             st.rerun()
@@ -122,7 +140,6 @@ def agents_screen():
 
     top_brand()
     st.markdown("## 🧠 Agentes de IA")
-
     st.info(
         "Esta sección se habilitará en una fase futura. "
         "Por ahora, utiliza **Herramientas de IA** para acceder a los módulos."
@@ -134,67 +151,25 @@ def agents_screen():
         st.rerun()
 
 
-def tools_landing_screen():
-    # Sidebar con controles extra
+def tools_dashboard():
     tools_sidebar_controls()
 
     top_brand()
 
     st.markdown("## 🧰 Herramientas de IA")
     st.caption("Selecciona una herramienta para comenzar. También puedes navegar desde el menú lateral.")
-
     st.write("")
 
-    # ---- Ajusta estos paths exactamente a tus archivos dentro de /pages ----
-    modules = [
-        {
-            "title": "Transcripción",
-            "emoji": "🎧",
-            "desc": "Convierte audio en español a texto listo para copiar o exportar.",
-            "page": "1_🎧_Transcripcion.py",
-        },
-        {
-            "title": "Traducción",
-            "emoji": "🌐",
-            "desc": "Traduce texto Inglés ↔ Español con formato claro y profesional.",
-            "page": "2_🌐_Traduccion.py",
-        },
-        {
-            "title": "Minutas y acciones",
-            "emoji": "📝",
-            "desc": "Genera minuta estructurada y lista de acciones con responsables y fechas.",
-            "page": "3_📝_Minutas_y_acciones.py",
-        },
-        {
-            "title": "Documentos",
-            "emoji": "📄",
-            "desc": "Extrae información de PDFs/escaneos (OCR) y crea exportables.",
-            "page": "4_📄_Documentos.py",
-        },
-        {
-            "title": "Forecast y anomalías",
-            "emoji": "📈",
-            "desc": "Pronóstico + detección de desviaciones para análisis rápido.",
-            "page": "5_📈_Forecast_y_Anomalias.py",
-        },
-        {
-            "title": "NLP Operación",
-            "emoji": "🧠",
-            "desc": "Clasifica solicitudes internas, prioridad, área destino y datos clave.",
-            "page": "6_🧠_NLP_Operacion.py",
-        },
-    ]
-
-    # ---- Estilo cards (sutil y corporativo) ----
+    # ---- Cards style ----
     st.markdown(
         """
         <style>
         .card {
-            border: 1px solid rgba(255,255,255,0.10);
-            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 18px;
             padding: 18px 18px 14px 18px;
-            background: rgba(255,255,255,0.03);
-            min-height: 170px;
+            background: rgba(255,255,255,0.04);
+            min-height: 190px;
         }
         .card h3 {
             margin: 0 0 6px 0;
@@ -202,7 +177,7 @@ def tools_landing_screen():
         }
         .card p {
             margin: 0;
-            opacity: 0.85;
+            opacity: 0.86;
             line-height: 1.35rem;
         }
         </style>
@@ -210,31 +185,88 @@ def tools_landing_screen():
         unsafe_allow_html=True,
     )
 
+    # ---- Ajusta estos paths EXACTOS a tus archivos en /pages ----
+    modules = [
+        {
+            "title": "Transcripción",
+            "emoji": "🎧",
+            "desc": "Convierte audio en español a texto listo para copiar o exportar.",
+            "chips": ["Operación", "Administrativo"],
+            "page": "pages/1_🎧_Transcripcion.py",
+        },
+        {
+            "title": "Traducción",
+            "emoji": "🌐",
+            "desc": "Traduce texto Inglés ↔ Español con formato claro y profesional.",
+            "chips": ["Administrativo", "Comercial"],
+            "page": "pages/2_🌐_Traduccion.py",
+        },
+        {
+            "title": "Minutas y acciones",
+            "emoji": "📝",
+            "desc": "Genera minuta estructurada y acciones con responsables y fechas.",
+            "chips": ["Administrativo", "Dirección"],
+            "page": "pages/3_📝_Minutas_y_acciones.py",
+        },
+        {
+            "title": "Documentos",
+            "emoji": "📄",
+            "desc": "Extrae información de PDFs/escaneos (OCR) y crea exportables.",
+            "chips": ["Finanzas", "Contabilidad", "Administrativo"],
+            "page": "pages/4_📄_Documentos.py",
+        },
+        {
+            "title": "Forecast y anomalías",
+            "emoji": "📈",
+            "desc": "Pronóstico + detección de desviaciones para análisis rápido.",
+            "chips": ["Finanzas", "Comercial", "Dirección"],
+            "page": "pages/5_📈_Forecast_y_Anomalias.py",
+        },
+        {
+            "title": "NLP Corporativo",
+            "emoji": "🧠",
+            "desc": "Clasifica solicitudes internas, prioridad, área destino y datos clave.",
+            "chips": ["Tesorería", "Comercial", "RRHH"],
+            "page": "pages/6_🧠_NLP_Operacion.py",
+        },
+    ]
+
     # ---- Grid 3 columnas ----
     cols = st.columns(3, gap="large")
 
     for i, m in enumerate(modules):
         with cols[i % 3]:
-            with st.container():
-                st.markdown(
-                    f"""
-                    <div class="card">
-                      <h3>{m["emoji"]} {m["title"]}</h3>
-                      <p>{m["desc"]}</p>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+            st.markdown(
+                f"""
+                <div class="card">
+                  <h3>{m["emoji"]} {m["title"]}</h3>
+                  <p>{m["desc"]}</p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-                c1, c2 = st.columns([1, 1])
-                with c1:
-                    if st.button("Abrir", key=f"open_{i}", use_container_width=True, type="primary"):
-                        st.switch_page(m["page"])
-                with c2:
-                    st.button("Info", key=f"info_{i}", use_container_width=True)
+            # Chips debajo de la card
+            st.write("")
+            for ch in m.get("chips", []):
+                pill(ch)
 
-                # Acción para "Info"
-                if st.session_state.get(f"info_{i}", False):
-                    st.toast(f'{m["title"]}: {m["desc"]}', icon="ℹ️")
+            st.write("")
+            if st.button("Abrir", key=f"open_{i}", type="primary", use_container_width=True):
+                st.switch_page(m["page"])
 
+
+# ----------------------------
+# Router
+# ----------------------------
+if st.session_state.section == "home":
+    home_screen()
+    st.stop()
+
+if st.session_state.section == "agents":
+    agents_screen()
+    st.stop()
+
+# Tools
+tools_dashboard()
 
