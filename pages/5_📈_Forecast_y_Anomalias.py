@@ -1,3 +1,28 @@
+import streamlit as st
+
+def _hide_native_pages_sidebar():
+    st.markdown(
+        """
+        <style>
+        [data-testid="stSidebarNav"] { display: none !important; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+_hide_native_pages_sidebar()
+
+if "auth" not in st.session_state or not st.session_state.auth:
+    st.warning("Sesión no iniciada. Regresa al inicio para ingresar contraseña.")
+    st.stop()
+
+
+
+
+
+
+
+
 import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
