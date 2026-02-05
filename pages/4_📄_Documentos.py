@@ -1,7 +1,16 @@
 import json
 from io import BytesIO
 from utils_auth import require_password
+
+
+import streamlit as st
+
+from utils_nav import require_tools_mode
+
 require_password()
+require_tools_mode()
+
+
 
 import pandas as pd
 import streamlit as st
