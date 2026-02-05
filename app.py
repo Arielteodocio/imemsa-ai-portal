@@ -22,6 +22,8 @@ PAGES = {
     "NLP Operación": "pages/6_🧠_NLP_Operacion.py",
 }
 
+import os
+st.write("DEBUG pages existentes:", os.listdir("pages"))
 
 # =========================
 # HELPERS
