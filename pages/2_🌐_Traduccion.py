@@ -14,6 +14,32 @@ from services.translate_openai import translate_en_es
 from utils_export import to_docx_bytes, to_pdf_bytes
 from utils_errors import MAINTENANCE_MSG, show_maintenance_instead_of_api_error
 
+
+import streamlit as st
+from utils_ui import hide_streamlit_sidebar_pages
+
+hide_streamlit_sidebar_pages()
+
+# --- Requiere login
+if "auth_ok" not in st.session_state or not st.session_state.auth_ok:
+    st.switch_page("app.py")
+
+# --- Sidebar navegación (mismo look en todos)
+def logout():
+    st.session_state.auth_ok = False
+    st.switch_page("app.py")
+
+with st.sidebar:
+    st.markdown("### Navegación")
+    if st.button("🧰 Tablero", use_container_width=True):
+        st.switch_page("app.py")
+    st.markdown("---")
+    st.button("Cerrar sesión", on_click=logout, use_container_width=True)
+
+
+
+
+
 st.set_page_config(page_title="Traducción", page_icon="🌐", layout="wide")
 
 st.title("🌐 Traducción (Texto → Texto)")
