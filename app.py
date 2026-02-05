@@ -13,7 +13,8 @@ st.set_page_config(
 
 hide_streamlit_sidebar_pages()
 
-APP_PASSWORD = "imemsa26"  # recomendado: pásalo a st.secrets (abajo te digo cómo)
+
+APP_PASSWORD = st.secrets["APP_PASSWORD"]
 
 
 # =========================
