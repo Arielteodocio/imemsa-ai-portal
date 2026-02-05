@@ -15,37 +15,37 @@ def tools_landing_screen():
             "title": "Transcripción",
             "emoji": "🎧",
             "desc": "Convierte audio en español a texto listo para copiar o exportar.",
-            "page": "pages/1_🎧_Transcripcion.py",
+            "page": "1_🎧_Transcripcion.py",
         },
         {
             "title": "Traducción",
             "emoji": "🌐",
             "desc": "Traduce texto Inglés ↔ Español con formato claro y profesional.",
-            "page": "pages/2_🌐_Traduccion.py",
+            "page": "2_🌐_Traduccion.py",
         },
         {
             "title": "Minutas y acciones",
             "emoji": "📝",
             "desc": "Genera minuta estructurada y lista de acciones con responsables y fechas.",
-            "page": "pages/3_📝_Minutas_y_acciones.py",
+            "page": "3_📝_Minutas_y_acciones.py",
         },
         {
             "title": "Documentos",
             "emoji": "📄",
             "desc": "Extrae información de PDFs/escaneos (OCR) y crea exportables.",
-            "page": "pages/4_📄_Documentos.py",
+            "page": "4_📄_Documentos.py",
         },
         {
             "title": "Forecast y anomalías",
             "emoji": "📈",
             "desc": "Pronóstico + detección de desviaciones para análisis rápido.",
-            "page": "pages/5_📈_Forecast_y_Anomalias.py",
+            "page": "5_📈_Forecast_y_Anomalias.py",
         },
         {
             "title": "NLP Operación",
             "emoji": "🧠",
             "desc": "Clasifica solicitudes internas, prioridad, área destino y datos clave.",
-            "page": "pages/6_🧠_NLP_Operacion.py",
+            "page": "6_🧠_NLP_Operacion.py",
         },
     ]
 
