@@ -30,10 +30,12 @@ def require_password() -> None:
         if st.button("Entrar", type="primary"):
             if hmac.compare_digest(pwd, correct):
                 st.session_state["authenticated"] = True
-                st.rerun()
+                st.session_state["section"] = "home"
+                st.switch_page("app.py")
             else:
                 st.error("Contraseña incorrecta. Intenta de nuevo.")
 
+    
     with c2:
         st.info("Si no cuentas con acceso, contacta a un integrante del Comite de IA.")
 
