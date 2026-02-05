@@ -10,12 +10,34 @@ require_tools_mode()
 tools_sidebar_controls()
 hide_streamlit_sidebar_pages()
 
-
-
-
 from services.nlp_ops_openai import analyze_ticket
 from utils_excel_multi import to_xlsx_multiple_sheets
 from utils_errors import MAINTENANCE_MSG, show_maintenance_instead_of_api_error
+
+
+import streamlit as st
+from utils_ui import hide_streamlit_sidebar_pages
+
+hide_streamlit_sidebar_pages()
+
+# --- Requiere login
+if "auth_ok" not in st.session_state or not st.session_state.auth_ok:
+    st.switch_page("app.py")
+
+# --- Sidebar navegación (mismo look en todos)
+def logout():
+    st.session_state.auth_ok = False
+    st.switch_page("app.py")
+
+with st.sidebar:
+    st.markdown("### Navegación")
+    if st.button("🧰 Tablero", use_container_width=True):
+        st.switch_page("app.py")
+    st.markdown("---")
+    st.button("Cerrar sesión", on_click=logout, use_container_width=True)
+
+
+
 
 st.set_page_config(page_title="NLP Corporativo", page_icon="🧠", layout="wide")
 
