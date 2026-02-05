@@ -171,8 +171,10 @@ def tool_card(title, icon, desc, tags, page_path, key):
         """,
         unsafe_allow_html=True,
     )
-    # Navegación recomendada: page_link (más estable)
-    st.page_link(page_path, label="Abrir", icon="➡️", use_container_width=True, disabled=False)
+
+    # Botón real (estable) -> navega a pages/...
+    if st.button("➡️ Abrir", use_container_width=True, key=f"open_{key}"):
+        st.switch_page(page_path)
 
 
 def render_tools():
