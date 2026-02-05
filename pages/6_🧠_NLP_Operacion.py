@@ -17,7 +17,7 @@ st.caption(
 )
 
 texto = st.text_area(
-    "Pega aquí el correo / ticket / solicitud",
+    "Pega aquí el correo o solicitud",
     height=260,
     placeholder="Ej: 'Necesito pagar hoy al proveedor X, factura 1234, OC 456... impacta embarque...'",
 )
