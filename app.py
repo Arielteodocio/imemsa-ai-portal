@@ -1,5 +1,30 @@
 import streamlit as st
 
+# --- Router: ejecuta navegación ANTES de renderizar cualquier cosa ---
+PAGES = {
+    "Transcripción": "pages/1_🎧_Transcripcion.py",
+    "Traducción": "pages/2_🌐_Traduccion.py",
+    "Minutas y acciones": "pages/3_📝_Minutas_y_acciones.py",
+    "Documentos": "pages/4_📄_Documentos.py",
+    "Forecast y Anomalías": "pages/5_📈_Forecast_y_Anomalias.py",
+    "NLP Operación": "pages/6_🧠_NLP_Operacion.py",
+}
+
+def _handle_pending_navigation():
+    target = st.session_state.get("_go_to_page", None)
+    if target:
+        st.session_state["_go_to_page"] = None  # limpia para evitar loops
+        st.switch_page(PAGES[target])
+        st.stop()  # IMPORTANTÍSIMO: evita que se siga renderizando esta página
+
+_handle_pending_navigation()
+
+
+
+
+
+import streamlit as st
+
 # =========================
 # CONFIG
 # =========================
