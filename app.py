@@ -1,6 +1,7 @@
 import streamlit as st
 
 from utils_ui import hide_streamlit_sidebar_pages
+import os
 
 # =========================
 # Config
@@ -77,19 +78,21 @@ def require_auth():
     st.stop()
 
 
+
+
 def card(title, icon, desc, tags, page_path):
-    """Tarjeta clickeable estilo mini-tablero."""
     with st.container(border=True):
         st.markdown(f"### {icon} {title}")
         st.write(desc)
-
         if tags:
             st.caption(" · ".join(tags))
 
-        st.markdown("")
-        if st.button("Abrir", key=f"open_{page_path}", use_container_width=True):
-            # OJO: page_path debe coincidir con el archivo real en /pages
-            st.switch_page(page_path)
+        # Validación del archivo (para que no “parezca que no hace nada”)
+        if not os.path.exists(page_path):
+            st.warning(f"No encuentro el archivo: `{page_path}`")
+            st.caption("Revisa el nombre exacto en la carpeta /pages")
+            return
+
 
 
 # =========================
