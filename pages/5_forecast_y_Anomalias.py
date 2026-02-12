@@ -2,11 +2,11 @@ import io
 import os
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
-from utils_ui import render_title
 
 import pandas as pd
 import requests
 import streamlit as st
+from imemsa_ui import render_title
 
 # ==========================================================
 # PÁGINA: 📈 Forecast y anomalías
@@ -27,16 +27,11 @@ def require_login() -> None:
 require_login()
 
 # --------- UI Header
-st.markdown("# 📈 Forecast y anomalías")
-st.caption(
-    "Sube una serie de tiempo (fecha + métrica) para generar un **pronóstico** y detectar "
-    "**anomalías** (picos/caídas atípicas) con un método robusto."
-)
+render_title('📈 Forecast y anomalías', 'Sube una serie de tiempo para generar pronóstico y detectar anomalías.')
 
 if hasattr(st, "page_link"):
     st.page_link("app.py", label="⬅️ Volver al Portafolio", icon="🏠", use_container_width=True)
 
-st.divider()
 
 with st.expander("📌 Formato esperado", expanded=False):
     st.write(
@@ -375,4 +370,3 @@ if btn:
         st.error("Ocurrió un error al procesar el archivo. Revisa el formato e intenta de nuevo.")
         with st.expander("🛠️ Detalle técnico (admin)", expanded=False):
             st.exception(e)
-
