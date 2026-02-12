@@ -90,11 +90,11 @@ with st.sidebar:
 
 #st.set_page_config(page_title="Forecast y Anomalías", page_icon="📈", layout="wide")
 
-st.title("📈 Forecast y Anomalías")
-st.caption(
-    "Sube una serie de tiempo (fecha + métrica) para generar un pronóstico y detectar posibles anomalías "
-    "(picos o caídas atípicas)."
-)
+#st.title("📈 Forecast y Anomalías")
+#st.caption(
+#    "Sube una serie de tiempo (fecha + métrica) para generar un pronóstico y detectar posibles anomalías "
+#    "(picos o caídas atípicas)."
+#)
 
 with st.expander("📌 Formato esperado", expanded=False):
     st.write(
