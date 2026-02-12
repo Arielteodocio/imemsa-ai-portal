@@ -394,28 +394,8 @@ footer {visibility: hidden;}         /* oculta footer */
 </style>
 """, unsafe_allow_html=True)
 
-_logo_b64 = logo_base64()
-if _logo_b64:
-    st.markdown(
-        f"""
-        <div class="app-header">
-          <img class="logo" src="data:image/png;base64,{_logo_b64}" alt="logo"/>
-          <div class="titles">
-            <h1>Indicadores (últimos 5 días) + Noticias</h1>
-            <p> </p>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-else:
-   
-    st.title("📈 Indicadores + Noticias")
-    st.caption("Excel con tipos de cambio, noticias y gráficos.")
+# --- Header con logo eliminado: el portal ya muestra branding y este módulo usa render_title() arriba.
 
-if _logo_b64:
- 
-    #st.sidebar.image(f"data:image/png;base64,{_logo_b64}", use_container_width=True)
 
 def http_session(timeout=15):
     s = requests.Session()
