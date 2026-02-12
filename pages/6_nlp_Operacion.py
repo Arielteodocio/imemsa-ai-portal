@@ -9,6 +9,8 @@ import pandas as pd
 import requests
 import streamlit as st
 from imemsa_ui import render_title
+from utils_portal_auth import require_login_redirect
+
 
 # ==========================================================
 # PÁGINA: 🧠 NLP Operación
@@ -20,15 +22,16 @@ from imemsa_ui import render_title
 # ==========================================================
 
 # --------- Login guard (misma llave que app.py del proyecto base)
-def require_login() -> None:
-    if not st.session_state.get("auth", False):
-        st.error("🔒 Inicia sesión para usar esta herramienta.")
-        if hasattr(st, "page_link"):
-            st.page_link("app.py", label="Ir al Login", icon="🔐", use_container_width=True)
-        st.stop()
+#def require_login() -> None:
+#    if not st.session_state.get("auth", False):
+#        st.error("🔒 Inicia sesión para usar esta herramienta.")
+#        if hasattr(st, "page_link"):
+#            st.page_link("app.py", label="Ir al Login", icon="🔐", use_container_width=True)
+#        st.stop()
+require_login_redirect()
 
 
-require_login()
+#require_login()
 
 # --------- UI Header
 render_title('🧠 NLP Operación', 'Clasifica solicitudes internas y sugiere acciones para operación.')
