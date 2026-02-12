@@ -1,6 +1,8 @@
 import os
 import re
 import streamlit as st
+from pathlib import Path
+
 
 # =========================
 # CONFIG (SIEMPRE PRIMERO)
@@ -117,6 +119,24 @@ def do_logout():
 # =========================
 # SIDEBAR
 # =========================
+
+# --- LOGO IMEMSA en sidebar ---
+BASE_DIR = Path(__file__).parent
+
+# Soporta el nombre que me dijiste y también el que se ve en tu captura (minúsculas)
+logo_candidates = [
+    BASE_DIR / "Imemsa_logo.png",
+    BASE_DIR / "imemsa_logo.png",
+]
+
+logo_path = next((p for p in logo_candidates if p.exists()), None)
+
+if logo_path:
+    st.sidebar.image(str(logo_path), use_container_width=True)
+    st.sidebar.markdown("---")  # separador
+else:
+    st.sidebar.caption("⚠️ No se encontró el logo (Imemsa_logo.png).")
+
 with st.sidebar:
     st.markdown("## Menú")
 
