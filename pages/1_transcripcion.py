@@ -6,6 +6,7 @@ from typing import Optional, Tuple
 import requests
 import streamlit as st
 from imemsa_ui import render_title
+from utils_portal_auth import require_login_redirect
 
 # ==========================================================
 # PÁGINA: Transcripción (Audio → Texto)
@@ -14,14 +15,15 @@ from imemsa_ui import render_title
 # - SIN st.switch_page() / st.rerun() (evita loops)
 # - Exporta TXT siempre; DOCX/PDF si tienes dependencias
 # ==========================================================
+require_login_redirect()
 
 # --------- Login guard (misma llave que app.py del proyecto base)
-def require_login() -> None:
-    if not st.session_state.get("auth", False):
-        st.error("🔒 Inicia sesión para usar esta herramienta.")
-        if hasattr(st, "page_link"):
-            st.page_link("app.py", label="Ir al Login", icon="🔐", use_container_width=True)
-        st.stop()
+#def require_login() -> None:
+#    if not st.session_state.get("auth", False):
+#        st.error("🔒 Inicia sesión para usar esta herramienta.")
+#        if hasattr(st, "page_link"):
+#            st.page_link("app.py", label="Ir al Login", icon="🔐", use_container_width=True)
+#        st.stop()
 
 
 require_login()
