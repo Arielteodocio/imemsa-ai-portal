@@ -2,6 +2,7 @@ import io
 import os
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
+from utils_ui import render_title
 
 import pandas as pd
 import requests
