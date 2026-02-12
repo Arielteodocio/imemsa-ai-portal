@@ -26,7 +26,7 @@ require_login_redirect()
 #        st.stop()
 
 
-require_login()
+#require_login()
 
 # --------- UI Header
 render_title('🎧 Transcripción', 'Carga un audio y obtén la transcripción en español (lista para copiar o exportar).')
