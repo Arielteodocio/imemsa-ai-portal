@@ -18,6 +18,29 @@ if "auth" not in st.session_state or not st.session_state.auth:
 
 
 
+import streamlit as st
+
+# ✅ NO pongas st.set_page_config() aquí (solo en app.py)
+
+def require_login():
+    if not st.session_state.get("auth", False):
+        st.error("🔒 Inicia sesión para usar esta herramienta.")
+        if hasattr(st, "page_link"):
+            st.page_link("app.py", label="Ir al Login", icon="🔐", use_container_width=True)
+        else:
+            st.info("Vuelve a app.py para iniciar sesión.")
+        st.stop()
+
+require_login()
+
+# Header
+st.markdown("# 🧠 NLP Operación")
+if hasattr(st, "page_link"):
+    st.page_link("app.py", label="⬅️ Volver al Portafolio", icon="🏠", use_container_width=True)
+
+st.divider()
+
+st.info("Pega aquí el código de tu herramienta (la app que ya programaste).")
 
 
 
@@ -65,7 +88,7 @@ with st.sidebar:
 
 
 
-st.set_page_config(page_title="NLP Corporativo", page_icon="🧠", layout="wide")
+#st.set_page_config(page_title="NLP Corporativo", page_icon="🧠", layout="wide")
 
 st.title("🧠 NLP Corporativo (Clasificación y priorización)")
 st.caption(
