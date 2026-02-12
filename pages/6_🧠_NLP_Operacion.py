@@ -90,11 +90,11 @@ with st.sidebar:
 
 #st.set_page_config(page_title="NLP Corporativo", page_icon="🧠", layout="wide")
 
-st.title("🧠 NLP Corporativo (Clasificación y priorización)")
-st.caption(
-    "Clasifica solicitudes internas correo, asigna área destino, estima prioridad y extrae datos clave. "
-    "  "
-)
+#st.title("🧠 NLP Corporativo (Clasificación y priorización)")
+#st.caption(
+#    "Clasifica solicitudes internas correo, asigna área destino, estima prioridad y extrae datos clave. "
+#    "  "
+#)
 
 texto = st.text_area(
     "Pega aquí el correo o solicitud",
