@@ -37,12 +37,20 @@ LOGO_CANDIDATES = [
 ]
 
 def require_login() -> None:
-    if not st.session_state.get("auth", False):
+    """Si no hay sesión, redirige directo al Login del portal (sin pantalla intermedia)."""
+    if st.session_state.get("auth", False):
+        return
+
+    # Fuerza la vista de login en el portal y redirige
+    st.session_state["view"] = "login"
+    try:
+        st.switch_page("app.py")
+    except Exception:
+        # Fallback si switch_page no está disponible o falla
         st.error("🔒 Inicia sesión para usar esta herramienta.")
         if hasattr(st, "page_link"):
             st.page_link("app.py", label="Ir al Login", icon="🔐", use_container_width=True)
         st.stop()
-
 require_login()
 
 # Link de regreso (opcional)
