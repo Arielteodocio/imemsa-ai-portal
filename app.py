@@ -1,3 +1,5 @@
+import os
+import re
 import streamlit as st
 
 # =========================
@@ -15,48 +17,17 @@ st.set_page_config(
 # =========================
 PORTAL_PASSWORD = "imemsa26"   # <- cambia aquí si quieres
 APP_TITLE = "🤖 Portafolio de Herramientas de IA"
-
-TOOLS = [
-    {
-        "title": "🎧 Transcripción",
-        "desc": "Convierte audio a texto.",
-        "page": "pages/1_transcripcion.py",
-    },
-    {
-        "title": "🌐 Traducción",
-        "desc": "Traduce texto Inglés ↔ Español.",
-        "page": "pages/2_traduccion.py",
-    },
-    {
-        "title": "📝 Minutas y acciones",
-        "desc": "Minutas estructuradas y lista de acciones.",
-        "page": "pages/3_minutas_y_acciones.py",
-    },
-    {
-        "title": "📄 Documentos",
-        "desc": "Lectura/extracción de PDFs e imágenes.",
-        "page": "pages/4_documentos.py",
-    },
-    {
-        "title": "📈 Forecast y anomalías",
-        "desc": "Pronósticos y detección de anomalías.",
-        "page": "pages/5_forecast_y_anomalias.py",
-    },
-    {
-        "title": "🧠 NLP Operación",
-        "desc": "Clasificación y extracción de información.",
-        "page": "pages/6_nlp_operacion.py",
-    },
-]
+PAGES_DIR = "pages"
 
 # =========================
-# CSS (cards pro)
+# CSS
 # =========================
 st.markdown(
     """
 <style>
 /* Oculta el nav nativo de multipage (evita confusión) */
 [data-testid="stSidebarNav"] { display: none !important; }
+header, footer { visibility: hidden; }
 
 .card {
   border: 1px solid rgba(49,51,63,0.15);
@@ -78,6 +49,71 @@ st.markdown(
 st.session_state.setdefault("auth", False)
 st.session_state.setdefault("view", "login")  # login | home | tools
 
+
+# =========================
+# Helpers
+# =========================
+def _sort_key(fn: str):
+    """Ordena por prefijo numérico si existe: 1_xxx.py"""
+    stem = fn[:-3]
+    m = re.match(r"^(\d+)[_\- ].*", stem)
+    if m:
+        return (0, int(m.group(1)), fn.lower())
+    return (1, 9999, fn.lower())
+
+
+def _title_from_filename(fn: str) -> str:
+    """Convierte nombre archivo a título bonito."""
+    name = fn[:-3].lower()
+
+    if "transcrip" in name:
+        return "🎧 Transcripción"
+    if "tradu" in name:
+        return "🌐 Traducción"
+    if "minut" in name or "accion" in name:
+        return "📝 Minutas y acciones"
+    if "doc" in name or "pdf" in name:
+        return "📄 Documentos"
+    if "forecast" in name or "anom" in name:
+        return "📈 Forecast y anomalías"
+    if "nlp" in name or "oper" in name:
+        return "🧠 NLP Operación"
+
+    # fallback: limpia prefijo numérico
+    stem = fn[:-3]
+    stem = re.sub(r"^\d+[_\- ]*", "", stem)
+    stem = stem.replace("_", " ").replace("-", " ").strip()
+    return stem[:1].upper() + stem[1:]
+
+
+def discover_pages():
+    """Auto-detecta archivos .py dentro de /pages para evitar PageNotFoundError."""
+    if not os.path.isdir(PAGES_DIR):
+        return []
+
+    files = [f for f in os.listdir(PAGES_DIR) if f.endswith(".py")]
+    files = sorted(files, key=_sort_key)
+
+    tools = []
+    for f in files:
+        tools.append(
+            {
+                "title": _title_from_filename(f),
+                "desc": "Abrir herramienta.",
+                "page": f"{PAGES_DIR}/{f}",
+            }
+        )
+    return tools
+
+
+TOOLS = discover_pages()
+
+
+def do_logout():
+    st.session_state.clear()
+    st.rerun()
+
+
 # =========================
 # SIDEBAR
 # =========================
@@ -97,10 +133,10 @@ with st.sidebar:
 
         st.divider()
         if st.button("Cerrar sesión", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
+            do_logout()
     else:
         st.caption("Inicia sesión para continuar.")
+
 
 # =========================
 # VIEWS
@@ -161,7 +197,11 @@ def render_tools():
     st.markdown("# 🧰 Herramientas de IA")
     st.caption("Da click y te manda directo a la página de la herramienta.")
 
-    # Grid 3 columnas
+    if not TOOLS:
+        st.error("No encontré páginas en la carpeta `pages/`.")
+        st.info("Verifica que exista la carpeta `pages` y que contenga tus archivos .py.")
+        st.stop()
+
     cols = st.columns(3)
     for i, t in enumerate(TOOLS):
         with cols[i % 3]:
@@ -175,13 +215,9 @@ def render_tools():
                 unsafe_allow_html=True,
             )
 
-            # Navegación robusta: page_link (sin switch_page)
-            if hasattr(st, "page_link"):
-                st.page_link(t["page"], label="Abrir", icon="➡️", use_container_width=True)
-            else:
-                # Fallback si tu Streamlit es muy viejo
-                if st.button("➡️ Abrir", key=f"open_{i}", use_container_width=True):
-                    st.switch_page(t["page"])
+            # ✅ Navegación por click (no valida la página al renderizar, evita PageNotFoundError)
+            if st.button("➡️ Abrir", key=f"open_{i}", use_container_width=True):
+                st.switch_page(t["page"])
 
     st.divider()
     if st.button("⬅️ Volver a Home", use_container_width=True):
@@ -196,7 +232,6 @@ if not st.session_state["auth"]:
     st.session_state["view"] = "login"
     render_login()
 else:
-    # si vienes ya logueado, default a home
     if st.session_state["view"] == "login":
         st.session_state["view"] = "home"
 
