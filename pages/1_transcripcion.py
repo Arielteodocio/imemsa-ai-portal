@@ -2,6 +2,7 @@ import io
 import os
 import time
 from typing import Optional, Tuple
+from utils_ui import render_title
 
 import requests
 import streamlit as st
