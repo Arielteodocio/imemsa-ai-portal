@@ -425,7 +425,7 @@ def fred_fetch_series(series_id: str, start: str | None = None, end: str | None 
 
 
 TZ_MX = pytz.timezone("America/Mexico_City")
-_check_password() 
+# _check_password()  # eliminado: el portal ya maneja login
 
 
 st.markdown("""
