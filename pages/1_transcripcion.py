@@ -2,10 +2,10 @@ import io
 import os
 import time
 from typing import Optional, Tuple
-from utils_ui import render_title
 
 import requests
 import streamlit as st
+from imemsa_ui import render_title
 
 # ==========================================================
 # PÁGINA: Transcripción (Audio → Texto)
@@ -27,13 +27,11 @@ def require_login() -> None:
 require_login()
 
 # --------- UI Header
-st.markdown("# 🎧 Transcripción")
-st.caption("Carga un audio y obtén la transcripción en español (lista para copiar o exportar).")
+render_title('🎧 Transcripción', 'Carga un audio y obtén la transcripción en español (lista para copiar o exportar).')
 
 if hasattr(st, "page_link"):
     st.page_link("app.py", label="⬅️ Volver al Portafolio", icon="🏠", use_container_width=True)
 
-st.divider()
 
 with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
     st.write(
@@ -258,4 +256,3 @@ if btn and audio_file is not None:
                 mime="application/pdf",
                 use_container_width=True,
             )
-
