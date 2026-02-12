@@ -20,6 +20,7 @@ from urllib.parse import urlparse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from requests.adapters import HTTPAdapter, Retry
+from utils_portal_auth import require_login_redirect
 
 # ==========================================================
 # INTEGRACIÓN CON PORTAFOLIO
@@ -38,22 +39,23 @@ LOGO_CANDIDATES = [
     BASE_DIR / "logo.png",
 ]
 
-def require_login() -> None:
-    """Si no hay sesión, redirige directo al Login del portal (sin pantalla intermedia)."""
-    if st.session_state.get("auth", False):
-        return
-
+#def require_login() -> None:
+#    """Si no hay sesión, redirige directo al Login del portal (sin pantalla intermedia)."""
+#    if st.session_state.get("auth", False):
+#        return
+#
     # Fuerza la vista de login en el portal y redirige
-    st.session_state["view"] = "login"
-    try:
-        st.switch_page("app.py")
-    except Exception:
-        # Fallback si switch_page no está disponible o falla
-        st.error("🔒 Inicia sesión para usar esta herramienta.")
-        if hasattr(st, "page_link"):
-            st.page_link("app.py", label="Ir al Login", icon="🔐", use_container_width=True)
-        st.stop()
-require_login()
+#    st.session_state["view"] = "login"
+#    try:
+#        st.switch_page("app.py")
+#    except Exception:
+#        # Fallback si switch_page no está disponible o falla
+#        st.error("🔒 Inicia sesión para usar esta herramienta.")
+#        if hasattr(st, "page_link"):
+#            st.page_link("app.py", label="Ir al Login", icon="🔐", use_container_width=True)
+#        st.stop()
+#require_login()
+require_login_redirect()
 
 
 @st.cache_data(ttl=60*60)
