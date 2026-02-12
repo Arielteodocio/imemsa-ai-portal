@@ -16,6 +16,29 @@ if "auth" not in st.session_state or not st.session_state.auth:
     st.warning("Sesión no iniciada. Regresa al inicio para ingresar contraseña.")
     st.stop()
 
+import streamlit as st
+
+# ✅ NO pongas st.set_page_config() aquí (solo en app.py)
+
+def require_login():
+    if not st.session_state.get("auth", False):
+        st.error("🔒 Inicia sesión para usar esta herramienta.")
+        if hasattr(st, "page_link"):
+            st.page_link("app.py", label="Ir al Login", icon="🔐", use_container_width=True)
+        else:
+            st.info("Vuelve a app.py para iniciar sesión.")
+        st.stop()
+
+require_login()
+
+# Header
+st.markdown("# 📝 Minutas y acciones")
+if hasattr(st, "page_link"):
+    st.page_link("app.py", label="⬅️ Volver al Portafolio", icon="🏠", use_container_width=True)
+
+st.divider()
+
+st.info("Pega aquí el código de tu herramienta (la app que ya programaste).")
 
 
 
@@ -69,7 +92,7 @@ with st.sidebar:
 
 
 
-st.set_page_config(page_title="Minutas y acciones", page_icon="📝", layout="wide")
+#st.set_page_config(page_title="Minutas y acciones", page_icon="📝", layout="wide")
 
 st.title("📝 Minutas y acciones")
 st.caption(
