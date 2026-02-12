@@ -90,11 +90,11 @@ with st.sidebar:
 
 #st.set_page_config(page_title="Transcripción", page_icon="🎧", layout="wide")
 
-st.title("🎧 Transcripción (Audio → Texto)")
-st.caption(
-    "Carga un audio en español y obtén la transcripción en texto (español). "
-    "Entrega el contenido transcrito listo para copiar o exportar."
-)
+#st.title("🎧 Transcripción (Audio → Texto)")
+#st.caption(
+#    "Carga un audio en español y obtén la transcripción en texto (español). "
+#    "Entrega el contenido transcrito listo para copiar o exportar."
+#)
 
 with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
     st.write(
