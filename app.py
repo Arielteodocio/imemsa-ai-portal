@@ -1,11 +1,7 @@
-import os
-import runpy
-import time
-import traceback
 import streamlit as st
 
 # =========================
-# CONFIG (DEBE IR PRIMERO)
+# CONFIG (SIEMPRE PRIMERO)
 # =========================
 st.set_page_config(
     page_title="IMEMSA | Portafolio de IA",
@@ -14,198 +10,197 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-PORTAL_PASSWORD = "imemsa26"
+# =========================
+# AJUSTES
+# =========================
+PORTAL_PASSWORD = "imemsa26"   # <- cambia aquí si quieres
+APP_TITLE = "🤖 Portafolio de Herramientas de IA"
+
+TOOLS = [
+    {
+        "title": "🎧 Transcripción",
+        "desc": "Convierte audio a texto.",
+        "page": "pages/1_transcripcion.py",
+    },
+    {
+        "title": "🌐 Traducción",
+        "desc": "Traduce texto Inglés ↔ Español.",
+        "page": "pages/2_traduccion.py",
+    },
+    {
+        "title": "📝 Minutas y acciones",
+        "desc": "Minutas estructuradas y lista de acciones.",
+        "page": "pages/3_minutas_y_acciones.py",
+    },
+    {
+        "title": "📄 Documentos",
+        "desc": "Lectura/extracción de PDFs e imágenes.",
+        "page": "pages/4_documentos.py",
+    },
+    {
+        "title": "📈 Forecast y anomalías",
+        "desc": "Pronósticos y detección de anomalías.",
+        "page": "pages/5_forecast_y_anomalias.py",
+    },
+    {
+        "title": "🧠 NLP Operación",
+        "desc": "Clasificación y extracción de información.",
+        "page": "pages/6_nlp_operacion.py",
+    },
+]
 
 # =========================
-# ANTI-BUCLE (protege el navegador)
+# CSS (cards pro)
 # =========================
-def loop_guard(max_runs: int = 50, window_sec: int = 10):
-    now = time.time()
-    t0 = st.session_state.get("_lg_t0", now)
-    n = st.session_state.get("_lg_n", 0)
+st.markdown(
+    """
+<style>
+/* Oculta el nav nativo de multipage (evita confusión) */
+[data-testid="stSidebarNav"] { display: none !important; }
 
-    if now - t0 > window_sec:
-        st.session_state["_lg_t0"] = now
-        st.session_state["_lg_n"] = 1
-        return
-
-    n += 1
-    st.session_state["_lg_n"] = n
-    if n > max_runs:
-        st.error("⚠️ Detecté un ciclo de recarga (rerun) demasiado rápido y lo detuve.")
-        st.info(
-            "Alguna herramienta (archivo dentro de `pages/`) probablemente está llamando "
-            "`st.rerun()`, `st.switch_page()` o cambiando query params en cada ejecución."
-        )
-        if st.button("🧹 Limpiar sesión y reiniciar", key="btn_clear_session", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
-        st.stop()
-
-loop_guard()
-
+.card {
+  border: 1px solid rgba(49,51,63,0.15);
+  border-radius: 18px;
+  padding: 16px 16px 12px 16px;
+  background: rgba(255,255,255,0.6);
+}
+.card h3 { margin: 0 0 6px 0; font-size: 1.05rem; }
+.card p { margin: 0 0 12px 0; opacity: 0.85; }
+.smallcap { opacity: 0.75; font-size: 0.9rem; }
+</style>
+""",
+    unsafe_allow_html=True,
+)
 
 # =========================
-# UTILIDADES
+# SESSION STATE
 # =========================
-def discover_tools(pages_dir: str = "pages"):
-    tools = {}
-    if not os.path.isdir(pages_dir):
-        return tools
-
-    files = [f for f in os.listdir(pages_dir) if f.endswith(".py")]
-
-    def _sort_key(fn: str):
-        # ordena por prefijo numérico si existe: 1_xxx.py
-        try:
-            prefix = fn.split("_", 1)[0]
-            return (0, int(prefix), fn)
-        except Exception:
-            return (1, 9999, fn)
-
-    for fn in sorted(files, key=_sort_key):
-        stem = fn[:-3]
-        parts = stem.split("_", 1)
-        if len(parts) == 2 and parts[0].isdigit():
-            title = parts[1].replace("_", " ")
-        else:
-            title = stem.replace("_", " ")
-        tools[title] = {"script": os.path.join(pages_dir, fn)}
-    return tools
-
-
-TOOLS = discover_tools("pages")
-
-
-def do_login():
-    pw = (st.session_state.get("pw_input") or "").strip()
-    if pw == PORTAL_PASSWORD:
-        st.session_state["auth"] = True
-    else:
-        st.session_state["auth"] = False
-        st.session_state["login_error"] = "Contraseña incorrecta."
-
-
-def do_logout():
-    # conserva la detección de tools, limpia lo demás
-    keep = {"_lg_t0": st.session_state.get("_lg_t0"), "_lg_n": st.session_state.get("_lg_n")}
-    st.session_state.clear()
-    st.session_state.update(keep)
-
-
-def _safe_switch_page(page_like):
-    # Evita navegación multipage real (causa pushState). Regresa al selector.
-    st.warning("🔁 Esta herramienta intentó navegar a otra página; lo bloqueé para evitar el bug de navegación.")
-    st.stop()
-
-
-def _run_tool_script(script_path: str):
-    if not os.path.exists(script_path):
-        st.error(f"❌ No encuentro el archivo: `{script_path}`")
-        st.stop()
-
-    # Compatibilidad para tools que usan otros flags
-    st.session_state.setdefault("authenticated", st.session_state.get("auth", False))
-    st.session_state.setdefault("logged_in", st.session_state.get("auth", False))
-
-    # Monkey patches seguros durante ejecución del tool
-    _orig_set_page_config = getattr(st, "set_page_config", None)
-    _orig_switch_page = getattr(st, "switch_page", None)
-    _orig_set_qp = getattr(st, "experimental_set_query_params", None)
-
-    try:
-        # Evita excepción: set_page_config solo una vez
-        st.set_page_config = lambda *args, **kwargs: None  # type: ignore
-        # Bloquea switch_page para no usar history.pushState
-        if _orig_switch_page is not None:
-            st.switch_page = _safe_switch_page  # type: ignore
-        # Bloquea set_query_params (también empuja history)
-        if _orig_set_qp is not None:
-            st.experimental_set_query_params = lambda **kwargs: None  # type: ignore
-
-        runpy.run_path(script_path, run_name="__main__")
-    except Exception:
-        st.error("⚠️ Error dentro de la herramienta:")
-        st.code(traceback.format_exc())
-    finally:
-        if _orig_set_page_config is not None:
-            st.set_page_config = _orig_set_page_config  # type: ignore
-        if _orig_switch_page is not None:
-            st.switch_page = _orig_switch_page  # type: ignore
-        if _orig_set_qp is not None:
-            st.experimental_set_query_params = _orig_set_qp  # type: ignore
-
-
-def hide_native_pages_sidebar():
-    st.markdown(
-        """
-        <style>
-        [data-testid="stSidebarNav"] { display: none !important; }
-        header, footer { visibility: hidden; }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-# =========================
-# UI
-# =========================
-hide_native_pages_sidebar()
 st.session_state.setdefault("auth", False)
+st.session_state.setdefault("view", "login")  # login | home | tools
 
+# =========================
+# SIDEBAR
+# =========================
 with st.sidebar:
     st.markdown("## Menú")
 
-    # Debug mini para saber si la app está recibiendo clicks/cambios
-    with st.expander("🧪 Diagnóstico rápido", expanded=False):
-        st.session_state["dbg_counter"] = st.session_state.get("dbg_counter", 0) + 1
-        st.caption(f"Reruns detectados: **{st.session_state['dbg_counter']}**")
-        st.toggle("Toggle de prueba", key="dbg_toggle")
-        st.text_input("Input de prueba", key="dbg_input")
-
-    st.divider()
-
-    if not st.session_state["auth"]:
-        st.markdown("### 🔒 Login")
-        st.text_input("Contraseña", type="password", key="pw_input", placeholder="••••••••")
-        st.button("Entrar", key="btn_login", on_click=do_login, use_container_width=True)
-        if st.session_state.get("login_error"):
-            st.error(st.session_state["login_error"])
-    else:
-        st.success("Sesión activa")
-        st.button("Cerrar sesión", key="btn_logout", on_click=do_logout, use_container_width=True)
+    if st.session_state["auth"]:
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("🏠 Home", use_container_width=True):
+                st.session_state["view"] = "home"
+                st.rerun()
+        with c2:
+            if st.button("🧰 Herr.", use_container_width=True):
+                st.session_state["view"] = "tools"
+                st.rerun()
 
         st.divider()
-        st.markdown("### Herramientas")
+        if st.button("Cerrar sesión", use_container_width=True):
+            st.session_state.clear()
+            st.rerun()
+    else:
+        st.caption("Inicia sesión para continuar.")
 
-        if not TOOLS:
-            st.warning("No detecté carpeta `pages/` o no hay archivos .py dentro.")
-        else:
-            # Selector estable (sin navegación)
-            options = list(TOOLS.keys())
-            current = st.session_state.get("tool_selected")
-            if current not in options:
-                st.session_state["tool_selected"] = options[0]
+# =========================
+# VIEWS
+# =========================
+def render_login():
+    st.markdown(f"# {APP_TITLE}")
+    st.caption("Acceso al portal")
 
-            st.selectbox(
-                "Selecciona una herramienta",
-                options=options,
-                key="tool_selected",
-                label_visibility="collapsed",
+    col1, col2, col3 = st.columns([1.1, 1.2, 1.1])
+    with col2:
+        with st.form("login_form", clear_on_submit=False):
+            st.markdown("### 🔒 Login")
+            pw = st.text_input("Contraseña", type="password", placeholder="••••••••", key="pw_input")
+            submit = st.form_submit_button("Entrar", use_container_width=True)
+
+        if submit:
+            if (pw or "").strip() == PORTAL_PASSWORD:
+                st.session_state["auth"] = True
+                st.session_state["view"] = "home"
+                st.rerun()
+            else:
+                st.error("Contraseña incorrecta.")
+
+
+def render_home():
+    st.markdown(f"# {APP_TITLE}")
+    st.caption("Selecciona una opción")
+
+    colA, colB = st.columns(2)
+    with colA:
+        st.markdown(
+            """
+<div class="card">
+  <h3>🧰 Herramientas de IA</h3>
+  <p>Transcripción, traducción, minutas, documentos y más.</p>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+        if st.button("Abrir Herramientas", use_container_width=True):
+            st.session_state["view"] = "tools"
+            st.rerun()
+
+    with colB:
+        st.markdown(
+            """
+<div class="card">
+  <h3>🧑‍💻 Agentes</h3>
+  <p class="smallcap">Deshabilitado por el momento.</p>
+</div>
+""",
+            unsafe_allow_html=True,
+        )
+        st.button("Agentes (próximamente)", disabled=True, use_container_width=True)
+
+
+def render_tools():
+    st.markdown("# 🧰 Herramientas de IA")
+    st.caption("Da click y te manda directo a la página de la herramienta.")
+
+    # Grid 3 columnas
+    cols = st.columns(3)
+    for i, t in enumerate(TOOLS):
+        with cols[i % 3]:
+            st.markdown(
+                f"""
+<div class="card">
+  <h3>{t["title"]}</h3>
+  <p>{t["desc"]}</p>
+</div>
+""",
+                unsafe_allow_html=True,
             )
 
-# MAIN
-if not st.session_state["auth"]:
-    st.markdown("# 🤖 Portafolio de Herramientas de IA")
-    st.caption("Inicia sesión en la barra izquierda para ver el catálogo.")
-else:
-    tool_name = st.session_state.get("tool_selected")
-    script_path = TOOLS.get(tool_name, {}).get("script")
+            # Navegación robusta: page_link (sin switch_page)
+            if hasattr(st, "page_link"):
+                st.page_link(t["page"], label="Abrir", icon="➡️", use_container_width=True)
+            else:
+                # Fallback si tu Streamlit es muy viejo
+                if st.button("➡️ Abrir", key=f"open_{i}", use_container_width=True):
+                    st.switch_page(t["page"])
 
-    st.markdown(f"# {tool_name}")
-    st.caption("Seleccionada desde el menú lateral. (Sin navegación multipage)")
     st.divider()
+    if st.button("⬅️ Volver a Home", use_container_width=True):
+        st.session_state["view"] = "home"
+        st.rerun()
 
-    _run_tool_script(script_path)
 
+# =========================
+# ROUTER
+# =========================
+if not st.session_state["auth"]:
+    st.session_state["view"] = "login"
+    render_login()
+else:
+    # si vienes ya logueado, default a home
+    if st.session_state["view"] == "login":
+        st.session_state["view"] = "home"
+
+    if st.session_state["view"] == "home":
+        render_home()
+    else:
+        render_tools()
