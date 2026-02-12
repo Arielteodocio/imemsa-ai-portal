@@ -81,7 +81,7 @@ def _title_from_filename(fn: str) -> str:
     if "nlp" in name or "oper" in name:
         return "🧠 NLP Operación"
     if "tipos_de_cambio" in name or "cambio" in name:
-    return "💱 Tipos de cambio"
+        return "💱 Tipos de cambio"
 
 
     # fallback: limpia prefijo numérico
