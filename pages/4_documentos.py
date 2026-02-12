@@ -4,11 +4,11 @@ import json
 import os
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
-from utils_ui import render_title
 
 import pandas as pd
 import requests
 import streamlit as st
+from imemsa_ui import render_title
 from PIL import Image
 
 # ==========================================================
@@ -30,13 +30,11 @@ def require_login() -> None:
 require_login()
 
 # --------- UI Header
-st.markdown("# 📄 Documentos")
-st.caption("Sube un PDF o imagen y obtén: **texto (OCR)** + **extracción estructurada** (campos e items).")
+render_title('📄 Documentos', 'Sube un PDF o imagen y obtén texto (OCR) y extracción estructurada.')
 
 if hasattr(st, "page_link"):
     st.page_link("app.py", label="⬅️ Volver al Portafolio", icon="🏠", use_container_width=True)
 
-st.divider()
 
 with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
     st.write(
