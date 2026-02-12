@@ -98,11 +98,11 @@ with st.sidebar:
 
 #st.set_page_config(page_title="Documentos", page_icon="📄", layout="wide")
 
-st.title("📄 Documentos (OCR + extracción)")
-st.caption(
-    "Sube un documento (PDF o imagen) y conviértelo a texto con OCR (Reconocimiento Óptico de Caracteres). "
-    "Después, extrae información clave y la entrega organizada para revisión y exportación."
-)
+#st.title("📄 Documentos (OCR + extracción)")
+#st.caption(
+#    "Sube un documento (PDF o imagen) y conviértelo a texto con OCR (Reconocimiento Óptico de Caracteres). "
+#    "Después, extrae información clave y la entrega organizada para revisión y exportación."
+#)
 
 with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
     st.write(
