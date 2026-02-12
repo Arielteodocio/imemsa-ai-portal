@@ -94,11 +94,11 @@ with st.sidebar:
 
 #st.set_page_config(page_title="Minutas y acciones", page_icon="📝", layout="wide")
 
-st.title("📝 Minutas y acciones")
-st.caption(
-    "Pega la transcripción de una reunión y genera una minuta con acuerdos y acciones. "
-    "Entrega un resumen estructurado con responsables y fechas (cuando estén disponibles en el texto)."
-)
+#st.title("📝 Minutas y acciones")
+#st.caption(
+#    "Pega la transcripción de una reunión y genera una minuta con acuerdos y acciones. "
+#    "Entrega un resumen estructurado con responsables y fechas (cuando estén disponibles en el texto)."
+#)
 
 with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
     st.write(
