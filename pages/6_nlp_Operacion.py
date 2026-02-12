@@ -4,11 +4,11 @@ import os
 import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
-from utils_ui import render_title
 
 import pandas as pd
 import requests
 import streamlit as st
+from imemsa_ui import render_title
 
 # ==========================================================
 # PÁGINA: 🧠 NLP Operación
@@ -31,16 +31,11 @@ def require_login() -> None:
 require_login()
 
 # --------- UI Header
-st.markdown("# 🧠 NLP Operación")
-st.caption(
-    "Pega un correo/solicitud interna y obtén: **área destino**, **tipo**, **prioridad**, "
-    "**datos clave**, **faltantes** y **acciones sugeridas**."
-)
+render_title('🧠 NLP Operación', 'Clasifica solicitudes internas y sugiere acciones para operación.')
 
 if hasattr(st, "page_link"):
     st.page_link("app.py", label="⬅️ Volver al Portafolio", icon="🏠", use_container_width=True)
 
-st.divider()
 
 with st.expander("📌 Qué hace y qué no hace", expanded=False):
     st.write(
@@ -337,4 +332,3 @@ if btn:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
             )
-
