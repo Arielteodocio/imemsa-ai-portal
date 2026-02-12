@@ -18,6 +18,8 @@ from urllib.parse import urlparse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from requests.adapters import HTTPAdapter, Retry
+from utils_ui import render_title
+
 
 # ==========================================================
 # INTEGRACIÓN CON PORTAFOLIO
