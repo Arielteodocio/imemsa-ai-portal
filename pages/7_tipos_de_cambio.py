@@ -22,12 +22,6 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from requests.adapters import HTTPAdapter, Retry
 from utils_portal_auth import require_login_redirect
 
-# ==========================================================
-# INTEGRACIÓN CON PORTAFOLIO
-# - No usamos set_page_config aquí (solo en app.py del portal)
-# - No login propio: usamos st.session_state['auth']
-# - Rutas robustas a archivos en el repo
-# ==========================================================
 
 BASE_DIR = Path(__file__).resolve().parents[1]  # repo root (../)
 TEMPLATE_DEFAULT = BASE_DIR / "Indicadores_template_2col.xlsx"
@@ -391,7 +385,6 @@ footer {visibility: hidden;}         /* oculta footer */
   display: flex; align-items: center; gap: 16px;
   padding: 8px 6px;
 }
-.app-header img.logo { height: 40px; }
 .app-header .titles h1 {
   font-size: 20px; margin: 0;
 }
@@ -417,12 +410,12 @@ if _logo_b64:
     )
 else:
    
-    st.title("📈 Indicadores (últimos 5 días) + Noticias")
+    st.title("📈 Indicadores + Noticias")
     st.caption("Excel con tipos de cambio, noticias y gráficos.")
 
 if _logo_b64:
  
-    st.sidebar.image(f"data:image/png;base64,{_logo_b64}", use_container_width=True)
+    #st.sidebar.image(f"data:image/png;base64,{_logo_b64}", use_container_width=True)
 
 def http_session(timeout=15):
     s = requests.Session()
