@@ -92,11 +92,11 @@ with st.sidebar:
 
 #st.set_page_config(page_title="Traducción", page_icon="🌐", layout="wide")
 
-st.title("🌐 Traducción (Texto → Texto)")
-st.caption(
-    "Pega el texto y obtén su traducción entre Inglés y Español. "
-    "Entrega el resultado listo para copiar o exportar."
-)
+#st.title("🌐 Traducción (Texto → Texto)")
+#st.caption(
+#    "Pega el texto y obtén su traducción entre Inglés y Español. "
+#    "Entrega el resultado listo para copiar o exportar."
+#)
 
 direction = st.radio(
     "Dirección de traducción",
