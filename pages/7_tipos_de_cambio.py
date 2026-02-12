@@ -3,6 +3,7 @@ import re
 import time
 import html
 import base64
+import os
 import pytz
 import re
 import requests
@@ -10,6 +11,7 @@ import feedparser
 import xlsxwriter
 from openpyxl import load_workbook
 import streamlit as st
+from imemsa_ui import render_title
 from datetime import datetime, timedelta, date
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -18,8 +20,6 @@ from urllib.parse import urlparse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from requests.adapters import HTTPAdapter, Retry
-from utils_ui import render_title
-
 
 # ==========================================================
 # INTEGRACIÓN CON PORTAFOLIO
@@ -54,10 +54,6 @@ def require_login() -> None:
             st.page_link("app.py", label="Ir al Login", icon="🔐", use_container_width=True)
         st.stop()
 require_login()
-
-# Link de regreso (opcional)
-if hasattr(st, "page_link"):
-    st.page_link("app.py", label="⬅️ Volver al Portafolio", icon="🏠", use_container_width=True)
 
 
 @st.cache_data(ttl=60*60)
@@ -298,68 +294,12 @@ if not DEBUG:
         
     except Exception:
         pass
-st.markdown("""
-<style>
-/* ---------- Layout general ---------- */
-.block-container { padding-top: 1.5rem; }
+# --------- UI Header
+render_title("📈 Indicadores de Tipo de Cambio")
 
-/* Encabezado */
-.imemsa-header {
-  display: flex; gap: 1.25rem; align-items: center; 
-  margin-bottom: 0.75rem;
-}
+if hasattr(st, "page_link"):
+    st.page_link("app.py", label="⬅️ Volver al Portafolio", icon="🏠", use_container_width=True)
 
-/* Logo */
-.imemsa-logo img {
-  max-height: 5px;        
-  width: auto;
-  border-radius: 10px;
-}
-
-/* Títulos */
-.imemsa-title {
-  line-height: 1.1;
-}
-.imemsa-title h1 {
-  margin: 0 0 0.25rem 0; 
-  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
-  font-weight: 500;
-}
-.imemsa-title h3 {
-  margin: 0; 
-  font-weight: 500; 
-  opacity: 0.95;
-}
-
-/* Línea divisoria con colores del logo */
-.imemsa-divider {
-  height: 6px;
-  width: 100%;
-  border-radius: 999px;
-  margin: 0.75rem 0 1rem 0;
-  background: linear-gradient(90deg, #0A4FA3 0%, #0A4FA3 40%, #E32028 40%, #E32028 60%, #0A4FA3 60%, #0A4FA3 100%);
-}
-
-/* Espaciado inferior tras el header */
-.imemsa-spacer { height: 12px; }
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown(
-    """
-    <div class="imemsa-header">
-      <div class="imemsa-logo">
-        <img src="logo.png" alt="IMEMSA logo">
-      </div>
-      <div class="imemsa-title">
-        <h1>Indicadores de Tipo de Cambio</h1>
-      </div>
-    </div>
-    <div class="imemsa-divider"></div>
-    <div class="imemsa-spacer"></div>
-    """,
-    unsafe_allow_html=True
-)
 
 
 
