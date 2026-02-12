@@ -1,6 +1,7 @@
 import io
 import os
 from typing import Optional, Tuple
+from utils_ui import render_title
 
 import requests
 import streamlit as st
