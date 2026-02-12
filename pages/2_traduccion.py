@@ -1,10 +1,10 @@
 import io
 import os
 from typing import Optional, Tuple
-from utils_ui import render_title
 
 import requests
 import streamlit as st
+from imemsa_ui import render_title
 
 # ==========================================================
 # PÁGINA: Traducción (Texto → Texto)
@@ -25,13 +25,11 @@ def require_login() -> None:
 require_login()
 
 # --------- UI Header
-st.markdown("# 🌐 Traducción")
-st.caption("Traduce entre Español ↔ Inglés manteniendo formato, números y términos técnicos.")
+render_title('🌐 Traducción', 'Traduce entre Español ↔ Inglés manteniendo formato, números y términos técnicos.')
 
 if hasattr(st, "page_link"):
     st.page_link("app.py", label="⬅️ Volver al Portafolio", icon="🏠", use_container_width=True)
 
-st.divider()
 
 with st.expander("Consejos de traducción (industrial/técnico)", expanded=False):
     st.write(
@@ -265,4 +263,3 @@ if btn:
                 mime="application/pdf",
                 use_container_width=True,
             )
-
