@@ -1363,7 +1363,7 @@ if st.button("Generar Excel"):
     cetes182, cetes182_f = _ffill_asof_with_flags_from_map(m_c182, header_dates)
     cetes364, cetes364_f = _ffill_asof_with_flags_from_map(m_c364, header_dates)
     try:
-        movex6  
+        _ = movex6  # evita salida 'magic' en Streamlit  
     except NameError:
         movex6 = rolling_movex_for_last6(window=movex_win)
     compra = [(x*(1 - margen_pct/100) if x is not None else None) for x in movex6]
@@ -1381,7 +1381,7 @@ if st.button("Generar Excel"):
     eur_usd = [((e/u) if (e is not None and u not in (None, 0)) else None) for e,u in zip(eur_vals, fix_vals)]
 
     try:
-        uma  
+        _ = uma  # evita salida 'magic' en Streamlit  
     except NameError:
         uma = get_uma(INEGI_TOKEN)
     prog.progress(65, text="Obteniendo UMA (INEGI)…")
