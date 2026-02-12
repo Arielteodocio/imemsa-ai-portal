@@ -1,32 +1,8 @@
 import streamlit as st
-
-# --- Router: ejecuta navegación ANTES de renderizar cualquier cosa ---
-PAGES = {
-    "Transcripción": "pages/1_🎧_Transcripcion.py",
-    "Traducción": "pages/2_🌐_Traduccion.py",
-    "Minutas y acciones": "pages/3_📝_Minutas_y_acciones.py",
-    "Documentos": "pages/4_📄_Documentos.py",
-    "Forecast y Anomalías": "pages/5_📈_Forecast_y_Anomalias.py",
-    "NLP Operación": "pages/6_🧠_NLP_Operacion.py",
-}
-
-def _handle_pending_navigation():
-    target = st.session_state.get("_go_to_page", None)
-    if target:
-        st.session_state["_go_to_page"] = None  # limpia para evitar loops
-        st.switch_page(PAGES[target])
-        st.stop()  # IMPORTANTÍSIMO: evita que se siga renderizando esta página
-
-_handle_pending_navigation()
-
-
-
-
-
-import streamlit as st
+from pathlib import Path
 
 # =========================
-# CONFIG
+# CONFIG (debe ir primero)
 # =========================
 st.set_page_config(
     page_title="IMEMSA | Portafolio de IA",
@@ -37,7 +13,7 @@ st.set_page_config(
 
 PORTAL_PASSWORD = "imemsa26"
 
-# Rutas reales de tus páginas (según tu captura)
+# Rutas reales de tus páginas (según tu repo/capturas)
 PAGES = {
     "Transcripción": "pages/1_🎧_Transcripcion.py",
     "Traducción": "pages/2_🌐_Traduccion.py",
@@ -47,52 +23,80 @@ PAGES = {
     "NLP Operación": "pages/6_🧠_NLP_Operacion.py",
 }
 
-
-
+LABELS = {
+    "Transcripción": "🎧 Transcripción",
+    "Traducción": "🌐 Traducción",
+    "Minutas y acciones": "📝 Minutas y acciones",
+    "Documentos": "📄 Documentos",
+    "Forecast y Anomalías": "📈 Forecast y anomalías",
+    "NLP Operación": "🧠 NLP Operación",
+}
 
 # =========================
-# HELPERS
+# SESSION + NAV
 # =========================
 def _init_session():
-    if "auth" not in st.session_state:
-        st.session_state.auth = False
-    if "view" not in st.session_state:
-        # views: "login" | "home" | "tools"
-        st.session_state.view = "login"
+    st.session_state.setdefault("auth", False)
+    st.session_state.setdefault("view", "login")  # login | home | tools
 
+def _queue_page(page_key: str):
+    """Programa el cambio de página y deja que ocurra al inicio del siguiente rerun."""
+    st.session_state["_go_to_page"] = page_key
+    st.rerun()
+
+def _handle_pending_navigation():
+    target = st.session_state.pop("_go_to_page", None)
+    if target:
+        st.switch_page(PAGES[target])
+        st.stop()  # evita que se siga renderizando esta página
+
+def _logout():
+    st.session_state["auth"] = False
+    st.session_state["view"] = "login"
+    st.session_state.pop("_go_to_page", None)
+    st.rerun()
+
+def _go(view_name: str):
+    st.session_state["view"] = view_name
+    st.rerun()
 
 def hide_native_pages_sidebar():
-    """
-    Oculta el menú nativo de multipage (la lista automática de pages en el sidebar).
-    Ojo: Streamlit no ofrece un 'switch' oficial; esto es CSS.
-    """
+    """Oculta el menú nativo de multipage (la lista automática de pages en el sidebar)."""
     st.markdown(
         """
         <style>
-        /* Oculta el selector de páginas nativo */
         [data-testid="stSidebarNav"] { display: none !important; }
-        /* Opcional: reduce el espacio arriba del sidebar */
         section[data-testid="stSidebar"] > div { padding-top: 0.5rem; }
         </style>
         """,
         unsafe_allow_html=True,
     )
 
+def render_sidebar():
+    with st.sidebar:
+        st.markdown("### Navegación")
+        st.button("🏠 Home", use_container_width=True, on_click=_go, args=("home",), key="sb_home")
+        st.button("🧰 Herramientas", use_container_width=True, on_click=_go, args=("tools",), key="sb_tools")
 
-def require_auth_or_stop():
-    """
-    Úsalo en app.py para decidir qué renderizar.
-    En las páginas (modules) haremos un equivalente para bloquear sin login.
-    """
-    if not st.session_state.auth:
-        st.session_state.view = "login"
-        st.stop()
+        st.divider()
+        st.markdown("### Abrir herramienta")
 
+        # Si tu versión de Streamlit tiene st.page_link, úsalo (es súper estable).
+        if hasattr(st, "page_link"):
+            for k, path in PAGES.items():
+                st.page_link(path, label=LABELS.get(k, k), use_container_width=True)
+        else:
+            for k in PAGES.keys():
+                st.button(
+                    LABELS.get(k, k),
+                    use_container_width=True,
+                    on_click=_queue_page,
+                    args=(k,),
+                    key=f"sb_open_{k}",
+                )
 
-def go(view_name: str):
-    st.session_state.view = view_name
-    st.rerun()
-
+        st.divider()
+        st.button("Cerrar sesión", use_container_width=True, on_click=_logout, key="sb_logout")
 
 # =========================
 # UI: LOGIN
@@ -106,49 +110,37 @@ def render_login():
         st.caption("Ingresa la contraseña para continuar.")
 
         pw = st.text_input("Contraseña", type="password", placeholder="••••••••")
+
         c1, c2 = st.columns([1, 2])
         with c1:
             if st.button("Entrar", use_container_width=True):
                 if (pw or "").strip() == PORTAL_PASSWORD:
-                    st.session_state.auth = True
-                    st.session_state.view = "home"
+                    st.session_state["auth"] = True
+                    st.session_state["view"] = "home"
+                    st.session_state.pop("_go_to_page", None)
                     st.rerun()
                 else:
                     st.error("Contraseña incorrecta.")
         with c2:
             st.info("Si no cuentas con acceso, contacta al administrador del portal.")
 
-
 # =========================
-# UI: HOME (Herramientas / Agentes)
+# UI: HOME
 # =========================
 def render_home():
     hide_native_pages_sidebar()
+    render_sidebar()
 
-    # Sidebar propio (solo navegación)
-    with st.sidebar:
-        st.markdown("### Navegación")
-        if st.button("🏠 Home", use_container_width=True):
-            go("home")
-        if st.button("🧰 Herramientas", use_container_width=True):
-            go("tools")
+    logo = Path("assets/imemsa_logo.png")
+    if logo.exists():
+        st.image(str(logo), width=220)
 
-        st.divider()
-        if st.button("Cerrar sesión", use_container_width=True):
-            st.session_state.auth = False
-            st.session_state.view = "login"
-            st.rerun()
-
-    # Contenido
-    st.image("assets/imemsa_logo.png", width=220) if False else None  # si tienes logo local, cambia a True y ajusta ruta
     st.markdown("# 🤖 Portafolio de Herramientas de IA")
     st.markdown(
         """
         **¡Bienvenido!**  
-        Este portal reúne herramientas de Inteligencia Artificial diseñadas para ayudarte a **trabajar más rápido**,  
+        Este portal reúne herramientas de Inteligencia Artificial para ayudarte a **trabajar más rápido**,  
         **reducir tareas repetitivas** y **mejorar la calidad** de tus entregables.
-
-        Selecciona una opción para comenzar:
         """
     )
 
@@ -166,8 +158,7 @@ def render_home():
             """,
             unsafe_allow_html=True,
         )
-        if st.button("Entrar a Herramientas", use_container_width=True, key="go_tools"):
-            go("tools")
+        st.button("Entrar a Herramientas", use_container_width=True, on_click=_go, args=("tools",), key="go_tools")
 
     with c2:
         st.markdown(
@@ -183,11 +174,10 @@ def render_home():
         )
         st.button("Próximamente", use_container_width=True, disabled=True, key="agents_disabled")
 
-
 # =========================
 # UI: TOOLS DASHBOARD
 # =========================
-def tool_card(title, icon, desc, tags, page_path, key):
+def tool_card(title, icon, desc, tags, page_key, key):
     st.markdown(
         f"""
         <div style="border:1px solid rgba(150,150,150,0.25); border-radius:18px; padding:18px; height: 260px;">
@@ -199,31 +189,16 @@ def tool_card(title, icon, desc, tags, page_path, key):
         unsafe_allow_html=True,
     )
 
-    if st.button("➡️ Abrir", use_container_width=True, key=f"open_{key}"):
-        st.switch_page(page_path)
-
+    # En vez de switch_page aquí (a veces se siente “sin acción”), programamos la navegación
+    st.button("➡️ Abrir", use_container_width=True, on_click=_queue_page, args=(page_key,), key=f"open_{key}")
 
 def render_tools():
     hide_native_pages_sidebar()
-
-    # Sidebar propio (solo navegación)
-    with st.sidebar:
-        st.markdown("### Navegación")
-        if st.button("🏠 Home", use_container_width=True):
-            go("home")
-        if st.button("🧰 Herramientas", use_container_width=True):
-            go("tools")
-
-        st.divider()
-        if st.button("Cerrar sesión", use_container_width=True):
-            st.session_state.auth = False
-            st.session_state.view = "login"
-            st.rerun()
+    render_sidebar()
 
     st.markdown("# 🧰 Herramientas de IA")
     st.caption("Selecciona una herramienta para comenzar.")
 
-    # Tablero
     r1 = st.columns(3, gap="large")
     with r1[0]:
         tool_card(
@@ -231,7 +206,7 @@ def render_tools():
             "🎧",
             "Convierte audio en español a texto listo para copiar o exportar.",
             ["Operación", "Administrativo"],
-            PAGES["Transcripción"],
+            "Transcripción",
             "t1",
         )
     with r1[1]:
@@ -240,7 +215,7 @@ def render_tools():
             "🌐",
             "Traduce texto Inglés ↔ Español con formato claro y profesional.",
             ["Administrativo", "Comercial"],
-            PAGES["Traducción"],
+            "Traducción",
             "t2",
         )
     with r1[2]:
@@ -249,19 +224,20 @@ def render_tools():
             "📝",
             "Genera minuta estructurada y acciones con responsables y fechas; exporta a Excel.",
             ["Administrativo", "Dirección"],
-            PAGES["Minutas y acciones"],
+            "Minutas y acciones",
             "t3",
         )
 
-    st.write("")
+    st.write("")  # separador
+
     r2 = st.columns(3, gap="large")
     with r2[0]:
         tool_card(
             "Documentos",
             "📄",
-            "Lee PDFs/imagenes, aplica OCR (lectura de texto en imágenes) y extrae información estructurada.",
+            "Lee PDFs/imagenes y extrae información estructurada.",
             ["Tesorería", "Administrativo"],
-            PAGES["Documentos"],
+            "Documentos",
             "t4",
         )
     with r2[1]:
@@ -270,39 +246,36 @@ def render_tools():
             "📈",
             "Pronostica series de tiempo y detecta anomalías para identificar cambios relevantes.",
             ["Planeación", "Dirección"],
-            PAGES["Forecast y Anomalías"],
+            "Forecast y Anomalías",
             "t5",
         )
     with r2[2]:
         tool_card(
             "NLP Operación",
             "🧠",
-            "Clasifica solicitudes internas, estima prioridad y extrae datos clave (ej. Factura + OC).",
+            "Clasifica solicitudes internas y extrae datos clave (ej. Factura + OC).",
             ["Tesorería", "Comercial"],
-            PAGES["NLP Operación"],
+            "NLP Operación",
             "t6",
         )
-
 
 # =========================
 # ROUTER
 # =========================
 _init_session()
+_handle_pending_navigation()  # <- se ejecuta muy temprano para que el cambio de página sea estable
 
-# Si no está autenticado, solo login.
-if not st.session_state.auth:
-    st.session_state.view = "login"
+if not st.session_state["auth"]:
+    st.session_state["view"] = "login"
     render_login()
 else:
-    # Ya autenticado -> router
-    if st.session_state.view == "login":
-        st.session_state.view = "home"
+    if st.session_state["view"] == "login":
+        st.session_state["view"] = "home"
 
-    if st.session_state.view == "home":
+    if st.session_state["view"] == "home":
         render_home()
-    elif st.session_state.view == "tools":
+    elif st.session_state["view"] == "tools":
         render_tools()
     else:
-        # fallback
         render_home()
 
