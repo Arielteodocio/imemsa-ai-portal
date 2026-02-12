@@ -4,11 +4,11 @@ import os
 import re
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple
-from utils_ui import render_title
 
 import pandas as pd
 import requests
 import streamlit as st
+from imemsa_ui import render_title
 
 # ==========================================================
 # PÁGINA: Minutas y acciones (Transcripción → Minuta + Acciones)
@@ -29,16 +29,11 @@ def require_login() -> None:
 require_login()
 
 # --------- UI Header
-st.markdown("# 📝 Minutas y acciones")
-st.caption(
-    "Pega la transcripción de una reunión y genera una minuta estructurada con acuerdos y acciones "
-    "(responsables y fechas si aparecen en el texto)."
-)
+render_title('📝 Minutas y acciones', 'Pega la transcripción de una reunión y genera minuta, acuerdos y acciones.')
 
 if hasattr(st, "page_link"):
     st.page_link("app.py", label="⬅️ Volver al Portafolio", icon="🏠", use_container_width=True)
 
-st.divider()
 
 with st.expander("🔒 Privacidad (cómo funciona)", expanded=False):
     st.write(
@@ -413,4 +408,3 @@ if btn:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
             )
-
